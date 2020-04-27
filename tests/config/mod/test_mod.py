@@ -11,6 +11,7 @@ import pytest
 from hypothesis import given, assume
 from hypothesis.strategies import text, characters
 from pydantic.error_wrappers import ValidationError
+from semver import VersionInfo
 
 from modist.config.mod.mod import (
     MOD_CONFIG_HOST_PATTERN,
@@ -92,5 +93,11 @@ def test_config_invalid_description_min_length(payload: dict):
     )
 )
 def test_config_invalid_description_max_length(payload: dict):
+    with pytest.raises(ValidationError):
+        ModConfig(**payload)
+
+
+@given(mod_config_payload(version_strategy=text()))
+def test_config_invalid_version(payload: dict):
     with pytest.raises(ValidationError):
         ModConfig(**payload)

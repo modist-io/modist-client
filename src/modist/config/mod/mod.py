@@ -7,6 +7,7 @@
 from pydantic.main import BaseModel
 from pydantic.fields import Field
 from pydantic.class_validators import validator
+from semver import VersionInfo
 
 from .meta import MetaConfig
 
@@ -20,6 +21,7 @@ MOD_CONFIG_HOST_PATTERN = (
 )
 MOD_CONFIG_DESCRIPTION_MIN_LENGTH = 3
 MOD_CONFIG_DESCRIPTION_MAX_LENGTH = 240
+MOD_CONFIG_DEFAULT_VERSION = "0.0.1"
 
 
 class ModConfig(BaseModel):
@@ -48,6 +50,11 @@ class ModConfig(BaseModel):
         min_length=MOD_CONFIG_DESCRIPTION_MIN_LENGTH,
         max_length=MOD_CONFIG_DESCRIPTION_MAX_LENGTH,
     )
+    version: str = Field(
+        default=MOD_CONFIG_DEFAULT_VERSION,
+        title="Mod Version",
+        description="Contains the local mod's version information",
+    )
     meta: MetaConfig = Field(
         title="Meta",
         description="Metadata of the mod configuration format",
@@ -67,4 +74,18 @@ class ModConfig(BaseModel):
         if value.count("\n") > 0:
             raise ValueError("should not have newlines")
 
+        return value
+
+    @validator("version")
+    def validate_version(cls, value: str) -> str:  # noqa
+        """Validate the given version number.
+
+        :param str value: The given version number
+        :raises ValueError: When the given version number is not valid semver
+        :return: The validated version number
+        :rtype: str
+        """
+
+        # NOTE: VersionInfo.parse will raise a ValueError on invalid semver strings
+        VersionInfo.parse(value)
         return value

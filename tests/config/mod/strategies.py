@@ -4,20 +4,29 @@
 
 """Contains custom hypothesis strategies for mod configuration testing."""
 
-from hypothesis.strategies import composite, from_regex, integers, text, characters
+from hypothesis.strategies import (
+    SearchStrategy,
+    text,
+    integers,
+    composite,
+    characters,
+    from_regex,
+)
 
 from modist.config.mod.mod import (
-    MOD_CONFIG_NAME_PATTERN,
     MOD_CONFIG_HOST_PATTERN,
-    MOD_CONFIG_DESCRIPTION_MIN_LENGTH,
+    MOD_CONFIG_NAME_PATTERN,
     MOD_CONFIG_DESCRIPTION_MAX_LENGTH,
+    MOD_CONFIG_DESCRIPTION_MIN_LENGTH,
     ModConfig,
 )
-from modist.config.mod.meta import SPEC_CONFIG_VERSION_MIN, SPEC_CONFIG_VERSION_MAX
+from modist.config.mod.meta import SPEC_CONFIG_VERSION_MAX, SPEC_CONFIG_VERSION_MIN
+
+from ...strategies import semver_version
 
 
 @composite
-def spec_config_payload(draw, version_strategy=None) -> dict:
+def spec_config_payload(draw, version_strategy: SearchStrategy[int] = None) -> dict:
     """Composite strategy for building a spec config payload."""
 
     return {
@@ -32,7 +41,7 @@ def spec_config_payload(draw, version_strategy=None) -> dict:
 
 
 @composite
-def meta_config_payload(draw, spec_strategy=None) -> dict:
+def meta_config_payload(draw, spec_strategy: SearchStrategy[dict] = None) -> dict:
     """Composite strategy for buliding a meta config payload."""
 
     return {"spec": draw(spec_config_payload() if not spec_strategy else spec_strategy)}
@@ -41,10 +50,11 @@ def meta_config_payload(draw, spec_strategy=None) -> dict:
 @composite
 def mod_config_payload(
     draw,
-    name_strategy=None,
-    description_strategy=None,
-    host_strategy=None,
-    meta_strategy=None,
+    name_strategy: SearchStrategy[str] = None,
+    description_strategy: SearchStrategy[str] = None,
+    host_strategy: SearchStrategy[str] = None,
+    version_strategy: SearchStrategy[str] = None,
+    meta_strategy: SearchStrategy[dict] = None,
 ) -> dict:
     """Composite strategy for building a mod config payload."""
 
@@ -70,5 +80,6 @@ def mod_config_payload(
                 else description_strategy
             )
         ),
+        "version": draw(semver_version() if not version_strategy else version_strategy),
         "meta": draw(meta_config_payload() if not meta_strategy else meta_strategy),
     }
