@@ -2,11 +2,12 @@
 # Copyright (c) 2020 Modist Team <admin@modist.io>
 # ISC License <https://opensource.org/licenses/isc>
 
-"""Contains the mod-section of the mod configuration."""
+"""Contains the root mod section of the mod configuration."""
 
 from pydantic import BaseModel
 from pydantic.fields import Field
 
+from .meta import MetaConfig
 
 MOD_CONFIG_NAME_MIN_LENGTH = 3
 MOD_CONFIG_NAME_MAX_LENGTH = 64
@@ -27,4 +28,9 @@ class ModConfig(BaseModel):
         min_length=MOD_CONFIG_NAME_MIN_LENGTH,
         max_length=MOD_CONFIG_NAME_MAX_LENGTH,
         regex=MOD_CONFIG_NAME_PATTERN,
+    )
+    meta: MetaConfig = Field(
+        title="Meta",
+        description="Metadata of the mod configuration format",
+        default_factory=MetaConfig,
     )
