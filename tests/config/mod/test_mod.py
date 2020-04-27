@@ -11,15 +11,14 @@ import pytest
 from hypothesis import given, assume
 from hypothesis.strategies import text, characters
 from pydantic.error_wrappers import ValidationError
-from semver import VersionInfo
 
 from modist.config.mod.mod import (
     MOD_CONFIG_HOST_PATTERN,
     MOD_CONFIG_NAME_PATTERN,
     MOD_CONFIG_NAME_MAX_LENGTH,
     MOD_CONFIG_NAME_MIN_LENGTH,
-    MOD_CONFIG_DESCRIPTION_MIN_LENGTH,
     MOD_CONFIG_DESCRIPTION_MAX_LENGTH,
+    MOD_CONFIG_DESCRIPTION_MIN_LENGTH,
     ModConfig,
 )
 

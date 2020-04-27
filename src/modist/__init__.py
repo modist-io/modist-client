@@ -3,6 +3,3 @@
 # ISC License <https://choosealicense.com/licenses/isc>
 
 """Contains the root-level module imports."""
-
-
-from . import __version__  # type: ignore

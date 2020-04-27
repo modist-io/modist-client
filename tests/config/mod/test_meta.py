@@ -6,15 +6,15 @@
 """
 
 import pytest
-from hypothesis import given, assume
+from hypothesis import given
 from hypothesis.strategies import integers
 from pydantic.error_wrappers import ValidationError
 
 from modist.config.mod.meta import (
+    SPEC_CONFIG_VERSION_MAX,
+    SPEC_CONFIG_VERSION_MIN,
     MetaConfig,
     SpecConfig,
-    SPEC_CONFIG_VERSION_MIN,
-    SPEC_CONFIG_VERSION_MAX,
 )
 
 from .strategies import meta_config_payload, spec_config_payload

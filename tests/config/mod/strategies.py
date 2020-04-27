@@ -18,7 +18,6 @@ from modist.config.mod.mod import (
     MOD_CONFIG_NAME_PATTERN,
     MOD_CONFIG_DESCRIPTION_MAX_LENGTH,
     MOD_CONFIG_DESCRIPTION_MIN_LENGTH,
-    ModConfig,
 )
 from modist.config.mod.meta import SPEC_CONFIG_VERSION_MAX, SPEC_CONFIG_VERSION_MIN
 
