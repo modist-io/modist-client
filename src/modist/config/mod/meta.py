@@ -4,7 +4,7 @@
 
 """Contains the meta section of the mod configuration."""
 
-from pydantic import BaseModel
+from pydantic.main import BaseModel
 from pydantic.fields import Field
 
 

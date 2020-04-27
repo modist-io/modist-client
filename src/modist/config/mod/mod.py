@@ -4,8 +4,9 @@
 
 """Contains the root mod section of the mod configuration."""
 
-from pydantic import BaseModel
+from pydantic.main import BaseModel
 from pydantic.fields import Field
+from pydantic.class_validators import validator
 
 from .meta import MetaConfig
 
@@ -17,6 +18,8 @@ MOD_CONFIG_HOST_PATTERN = (
     r"\."
     r"(?P<host>[a-z][a-z0-9\-]{1,62}[a-z0-9])\Z"
 )
+MOD_CONFIG_DESCRIPTION_MIN_LENGTH = 3
+MOD_CONFIG_DESCRIPTION_MAX_LENGTH = 240
 
 
 class ModConfig(BaseModel):
@@ -39,8 +42,29 @@ class ModConfig(BaseModel):
         description="Describes the host that the mod is built for",
         regex=MOD_CONFIG_HOST_PATTERN,
     )
+    description: str = Field(
+        title="Mod Description",
+        description="Describes in a short one-liner the purpose of the mod",
+        min_length=MOD_CONFIG_DESCRIPTION_MIN_LENGTH,
+        max_length=MOD_CONFIG_DESCRIPTION_MAX_LENGTH,
+    )
     meta: MetaConfig = Field(
         title="Meta",
         description="Metadata of the mod configuration format",
         default_factory=MetaConfig,
     )
+
+    @validator("description")
+    def validate_description(cls, value: str) -> str:  # noqa
+        """Validate the given description.
+
+        :param str value: The given description
+        :raises ValueError: When the description contains newlines
+        :returns: The validated description
+        :rtype: str
+        """
+
+        if value.count("\n") > 0:
+            raise ValueError("should not have newlines")
+
+        return value

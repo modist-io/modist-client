@@ -4,11 +4,13 @@
 
 """Contains custom hypothesis strategies for mod configuration testing."""
 
-from hypothesis.strategies import composite, from_regex, integers
+from hypothesis.strategies import composite, from_regex, integers, text, characters
 
 from modist.config.mod.mod import (
     MOD_CONFIG_NAME_PATTERN,
     MOD_CONFIG_HOST_PATTERN,
+    MOD_CONFIG_DESCRIPTION_MIN_LENGTH,
+    MOD_CONFIG_DESCRIPTION_MAX_LENGTH,
     ModConfig,
 )
 from modist.config.mod.meta import SPEC_CONFIG_VERSION_MIN, SPEC_CONFIG_VERSION_MAX
@@ -16,13 +18,7 @@ from modist.config.mod.meta import SPEC_CONFIG_VERSION_MIN, SPEC_CONFIG_VERSION_
 
 @composite
 def spec_config_payload(draw, version_strategy=None) -> dict:
-    """Composite strategy for building a spec config payload.
-
-    :param Callable[[SearchStrategy], Any] draw: The function for creating a strategy result
-    :param SearchStrategy version_strategy: The strategy to use for building a spec version, defaults to None
-    :return: A dictionary payload that can be used to create a :class:`~SpecConfig` instance
-    :rtype: dict
-    """
+    """Composite strategy for building a spec config payload."""
 
     return {
         "version": draw(
@@ -37,30 +33,20 @@ def spec_config_payload(draw, version_strategy=None) -> dict:
 
 @composite
 def meta_config_payload(draw, spec_strategy=None) -> dict:
-    """Composite strategy fro buliding a meta config payload.
-
-    :param Callable[[SearchStrategy], Any] draw: The function for creating a strategy result
-    :param SearchStrategy spec_strategy: The strategy to use for buliding a spec payload, defaults to None
-    :return: A dictionary payload that can be used to create a :class:`~MetaConfig` instance
-    :rtype: dict
-    """
+    """Composite strategy for buliding a meta config payload."""
 
     return {"spec": draw(spec_config_payload() if not spec_strategy else spec_strategy)}
 
 
 @composite
 def mod_config_payload(
-    draw, name_strategy=None, host_strategy=None, meta_strategy=None
+    draw,
+    name_strategy=None,
+    description_strategy=None,
+    host_strategy=None,
+    meta_strategy=None,
 ) -> dict:
-    """Composite strategy for building a mod config payload.
-
-    :param Callable[[SearchStrategy], Any] draw: The function for creating a strategy result
-    :param SerachStrategy name_strategy: The strategy to use for building a mod name, defaults to None
-    :param SerachStrategy host_strategy: The strategy to use for building a mod host, defaults to None
-    :param SearchStrategy meta_strategy: The strategy to use for building a meta payload, defaults to None
-    :return: A dictionary payload that can be used to create a :class:`~ModConfig` instance
-    :rtype: dict
-    """
+    """Composite strategy for building a mod config payload."""
 
     return {
         "name": (
@@ -72,6 +58,17 @@ def mod_config_payload(
             draw(from_regex(MOD_CONFIG_HOST_PATTERN))
             if not host_strategy
             else draw(host_strategy)
+        ),
+        "description": (
+            draw(
+                text(
+                    min_size=MOD_CONFIG_DESCRIPTION_MIN_LENGTH,
+                    max_size=MOD_CONFIG_DESCRIPTION_MAX_LENGTH,
+                    alphabet=characters(blacklist_categories=["Cc", "Zl"]),
+                )
+                if not description_strategy
+                else description_strategy
+            )
         ),
         "meta": draw(meta_config_payload() if not meta_strategy else meta_strategy),
     }
