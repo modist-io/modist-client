@@ -12,9 +12,10 @@ from hypothesis.strategies import text
 from pydantic.error_wrappers import ValidationError
 
 from modist.config.mod.mod import (
+    MOD_CONFIG_HOST_PATTERN,
     MOD_CONFIG_NAME_PATTERN,
-    MOD_CONFIG_NAME_MIN_LENGTH,
     MOD_CONFIG_NAME_MAX_LENGTH,
+    MOD_CONFIG_NAME_MIN_LENGTH,
     ModConfig,
 )
 
@@ -42,5 +43,12 @@ def test_config_invalid_name_min_length(payload: dict):
 
 @given(mod_config_payload(name_strategy=text(min_size=MOD_CONFIG_NAME_MAX_LENGTH + 1)))
 def test_config_invalid_name_max_length(payload: dict):
+    with pytest.raises(ValidationError):
+        ModConfig(**payload)
+
+
+@given(mod_config_payload(host_strategy=text()))
+def test_config_invalid_host(payload: dict):
+    assume(not re.match(MOD_CONFIG_HOST_PATTERN, payload["host"]))
     with pytest.raises(ValidationError):
         ModConfig(**payload)

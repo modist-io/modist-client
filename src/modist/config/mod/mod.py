@@ -11,7 +11,12 @@ from .meta import MetaConfig
 
 MOD_CONFIG_NAME_MIN_LENGTH = 3
 MOD_CONFIG_NAME_MAX_LENGTH = 64
-MOD_CONFIG_NAME_PATTERN = r"\A[a-zA-Z][\w\-]{2,62}[a-zA-Z0-9]\Z"
+MOD_CONFIG_NAME_PATTERN = r"\A(?P<name>[a-zA-Z][\w\-]{2,62}[a-zA-Z0-9])\Z"
+MOD_CONFIG_HOST_PATTERN = (
+    r"\A(?P<publisher>[a-z][a-z0-9\-]{1,62}[a-z0-9])"
+    r"\."
+    r"(?P<host>[a-z][a-z0-9\-]{1,62}[a-z0-9])\Z"
+)
 
 
 class ModConfig(BaseModel):
@@ -28,6 +33,11 @@ class ModConfig(BaseModel):
         min_length=MOD_CONFIG_NAME_MIN_LENGTH,
         max_length=MOD_CONFIG_NAME_MAX_LENGTH,
         regex=MOD_CONFIG_NAME_PATTERN,
+    )
+    host: str = Field(
+        title="Mod Host",
+        description="Describes the host that the mod is built for",
+        regex=MOD_CONFIG_HOST_PATTERN,
     )
     meta: MetaConfig = Field(
         title="Meta",

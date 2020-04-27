@@ -6,7 +6,11 @@
 
 from hypothesis.strategies import composite, from_regex, integers
 
-from modist.config.mod.mod import MOD_CONFIG_NAME_PATTERN, ModConfig
+from modist.config.mod.mod import (
+    MOD_CONFIG_NAME_PATTERN,
+    MOD_CONFIG_HOST_PATTERN,
+    ModConfig,
+)
 from modist.config.mod.meta import SPEC_CONFIG_VERSION_MIN, SPEC_CONFIG_VERSION_MAX
 
 
@@ -45,11 +49,14 @@ def meta_config_payload(draw, spec_strategy=None) -> dict:
 
 
 @composite
-def mod_config_payload(draw, name_strategy=None, meta_strategy=None) -> dict:
+def mod_config_payload(
+    draw, name_strategy=None, host_strategy=None, meta_strategy=None
+) -> dict:
     """Composite strategy for building a mod config payload.
 
     :param Callable[[SearchStrategy], Any] draw: The function for creating a strategy result
     :param SerachStrategy name_strategy: The strategy to use for building a mod name, defaults to None
+    :param SerachStrategy host_strategy: The strategy to use for building a mod host, defaults to None
     :param SearchStrategy meta_strategy: The strategy to use for building a meta payload, defaults to None
     :return: A dictionary payload that can be used to create a :class:`~ModConfig` instance
     :rtype: dict
@@ -60,6 +67,11 @@ def mod_config_payload(draw, name_strategy=None, meta_strategy=None) -> dict:
             draw(from_regex(MOD_CONFIG_NAME_PATTERN))
             if not name_strategy
             else draw(name_strategy)
+        ),
+        "host": (
+            draw(from_regex(MOD_CONFIG_HOST_PATTERN))
+            if not host_strategy
+            else draw(host_strategy)
         ),
         "meta": draw(meta_config_payload() if not meta_strategy else meta_strategy),
     }
