@@ -2,7 +2,7 @@
 # Copyright (c) 2020 Modist Team <admin@modist.io>
 # ISC License <https://choosealicense.com/licenses/isc>
 
-"""This moudle exposes some initial skeleton-code sanity checks."""
+"""Exposes some initial skeleton-code sanity checks."""
 
 
 def test_pytest():

@@ -2,5 +2,4 @@
 # Copyright (c) 2020 Modist Team <admin@modist.io>
 # ISC License <https://opensource.org/licenses/isc>
 
-"""
-"""
+"""Contains testing for the mod configuration structures."""

@@ -2,7 +2,7 @@
 # Copyright (c) 2020 Modist Team <admin@modist.io>
 # ISC License <https://choosealicense.com/licenses/isc>
 
-"""This moudle exposes some initial package building sanity checks."""
+"""Exposes some initial package building sanity checks."""
 
 
 def test_version_importable():
