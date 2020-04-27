@@ -16,7 +16,14 @@ MOD_CONFIG_NAME_PATTERN = r"\A[a-zA-Z][\w\-]{2,62}[a-zA-Z0-9]\Z"
 class ModConfig(BaseModel):
     """Defines the structure of the base mod config."""
 
+    class Config:
+        """Configuration for the mod config schema."""
+
+        title = "Mod"
+
     name: str = Field(
+        title="Mod Name",
+        description="Describes the user-given slug identifying name of the mod",
         min_length=MOD_CONFIG_NAME_MIN_LENGTH,
         max_length=MOD_CONFIG_NAME_MAX_LENGTH,
         regex=MOD_CONFIG_NAME_PATTERN,
