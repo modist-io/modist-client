@@ -4,11 +4,12 @@
 
 """Contains custom hypothesis strategies for mod configuration testing."""
 
-from typing import Optional
+from typing import List, Optional
 
 from hypothesis.strategies import (
     SearchStrategy,
     text,
+    lists,
     integers,
     composite,
     characters,
@@ -60,6 +61,7 @@ def mod_config_payload(
     host_strategy: Optional[SearchStrategy[str]] = None,
     version_strategy: Optional[SearchStrategy[str]] = None,
     author_strategy: Optional[SearchStrategy[str]] = None,
+    contributors_strategy: Optional[SearchStrategy[List[str]]] = None,
     meta_strategy: Optional[SearchStrategy[dict]] = None,
 ) -> dict:
     """Composite strategy for building a mod config payload."""
@@ -88,5 +90,8 @@ def mod_config_payload(
         ),
         "version": draw(semver_version() if not version_strategy else version_strategy),
         "author": draw(name_email() if not author_strategy else author_strategy),
+        "contributors": draw(
+            lists(name_email()) if not contributors_strategy else contributors_strategy
+        ),
         "meta": draw(meta_config_payload() if not meta_strategy else meta_strategy),
     }

@@ -4,6 +4,8 @@
 
 """Contains the root mod section of the mod configuration."""
 
+from typing import List
+
 from semver import VersionInfo
 from pydantic.main import BaseModel
 from pydantic.fields import Field
@@ -59,6 +61,11 @@ class ModConfig(BaseModel):
     author: NameEmail = Field(
         title="Mod Author",
         description="Describes the author of the mod and a way of contact",
+    )
+    contributors: List[NameEmail] = Field(
+        default=[],
+        title="Mod Contributors",
+        description="Describes any contributors to the mod and a way of contact",
     )
     meta: MetaConfig = Field(
         title="Meta",
