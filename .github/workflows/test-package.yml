@@ -21,7 +21,7 @@ jobs:
           python -m pip install -e .[test] --upgrade
       - name: Run Tests
         run: |
-          pytest
+          pytest -m "not extra"
   coverage:
     needs: test
     runs-on: ubuntu-latest
