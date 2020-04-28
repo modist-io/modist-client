@@ -4,10 +4,11 @@
 
 """Contains the root mod section of the mod configuration."""
 
+from semver import VersionInfo
 from pydantic.main import BaseModel
 from pydantic.fields import Field
+from pydantic.networks import NameEmail
 from pydantic.class_validators import validator
-from semver import VersionInfo
 
 from .meta import MetaConfig
 
@@ -54,6 +55,10 @@ class ModConfig(BaseModel):
         default=MOD_CONFIG_DEFAULT_VERSION,
         title="Mod Version",
         description="Contains the local mod's version information",
+    )
+    author: NameEmail = Field(
+        title="Mod Author",
+        description="Describes the author of the mod and a way of contact",
     )
     meta: MetaConfig = Field(
         title="Meta",

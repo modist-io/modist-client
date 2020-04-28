@@ -4,6 +4,8 @@
 
 """Contains custom hypothesis strategies for mod configuration testing."""
 
+from typing import Optional
+
 from hypothesis.strategies import (
     SearchStrategy,
     text,
@@ -21,11 +23,13 @@ from modist.config.mod.mod import (
 )
 from modist.config.mod.meta import SPEC_CONFIG_VERSION_MAX, SPEC_CONFIG_VERSION_MIN
 
-from ...strategies import semver_version
+from ...strategies import name_email, semver_version
 
 
 @composite
-def spec_config_payload(draw, version_strategy: SearchStrategy[int] = None) -> dict:
+def spec_config_payload(
+    draw, version_strategy: Optional[SearchStrategy[int]] = None
+) -> dict:
     """Composite strategy for building a spec config payload."""
 
     return {
@@ -40,7 +44,9 @@ def spec_config_payload(draw, version_strategy: SearchStrategy[int] = None) -> d
 
 
 @composite
-def meta_config_payload(draw, spec_strategy: SearchStrategy[dict] = None) -> dict:
+def meta_config_payload(
+    draw, spec_strategy: Optional[SearchStrategy[dict]] = None
+) -> dict:
     """Composite strategy for buliding a meta config payload."""
 
     return {"spec": draw(spec_config_payload() if not spec_strategy else spec_strategy)}
@@ -49,11 +55,12 @@ def meta_config_payload(draw, spec_strategy: SearchStrategy[dict] = None) -> dic
 @composite
 def mod_config_payload(
     draw,
-    name_strategy: SearchStrategy[str] = None,
-    description_strategy: SearchStrategy[str] = None,
-    host_strategy: SearchStrategy[str] = None,
-    version_strategy: SearchStrategy[str] = None,
-    meta_strategy: SearchStrategy[dict] = None,
+    name_strategy: Optional[SearchStrategy[str]] = None,
+    description_strategy: Optional[SearchStrategy[str]] = None,
+    host_strategy: Optional[SearchStrategy[str]] = None,
+    version_strategy: Optional[SearchStrategy[str]] = None,
+    author_strategy: Optional[SearchStrategy[str]] = None,
+    meta_strategy: Optional[SearchStrategy[dict]] = None,
 ) -> dict:
     """Composite strategy for building a mod config payload."""
 
@@ -80,5 +87,6 @@ def mod_config_payload(
             )
         ),
         "version": draw(semver_version() if not version_strategy else version_strategy),
+        "author": draw(name_email() if not author_strategy else author_strategy),
         "meta": draw(meta_config_payload() if not meta_strategy else meta_strategy),
     }
