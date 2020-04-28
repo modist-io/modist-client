@@ -11,7 +11,7 @@ import pytest
 from hypothesis import given, assume
 from pydantic.errors import EmailError
 from pydantic.networks import validate_email
-from hypothesis.strategies import text, characters
+from hypothesis.strategies import text, lists, characters
 from pydantic.error_wrappers import ValidationError
 
 from modist.config.mod.mod import (
@@ -26,6 +26,8 @@ from modist.config.mod.mod import (
 
 from .strategies import mod_config_payload
 
+TEST_TEXT_SAMPLE_SIZE = 12
+
 
 @given(mod_config_payload())
 def test_config_valid(payload: dict):
@@ -33,33 +35,49 @@ def test_config_valid(payload: dict):
     assert isinstance(config, ModConfig)
 
 
-@given(mod_config_payload(name_strategy=text()))
+@pytest.mark.extra
+@given(mod_config_payload(name_strategy=text(max_size=MOD_CONFIG_NAME_MAX_LENGTH)))
 def test_config_invalid_name(payload: dict):
     assume(not re.match(MOD_CONFIG_NAME_PATTERN, payload["name"]))
     with pytest.raises(ValidationError):
         ModConfig(**payload)
 
 
+@pytest.mark.extra
 @given(mod_config_payload(name_strategy=text(max_size=MOD_CONFIG_NAME_MIN_LENGTH - 1)))
 def test_config_invalid_name_min_length(payload: dict):
     with pytest.raises(ValidationError):
         ModConfig(**payload)
 
 
-@given(mod_config_payload(name_strategy=text(min_size=MOD_CONFIG_NAME_MAX_LENGTH + 1)))
+@pytest.mark.extra
+@pytest.mark.expensive
+@given(
+    mod_config_payload(
+        name_strategy=text(
+            min_size=MOD_CONFIG_NAME_MAX_LENGTH + 1,
+            max_size=MOD_CONFIG_DESCRIPTION_MAX_LENGTH + 1,
+        )
+    )
+)
 def test_config_invalid_name_max_length(payload: dict):
     with pytest.raises(ValidationError):
         ModConfig(**payload)
 
 
-@given(mod_config_payload(host_strategy=text()))
+@pytest.mark.extra
+@given(mod_config_payload(host_strategy=text(max_size=TEST_TEXT_SAMPLE_SIZE)))
 def test_config_invalid_host(payload: dict):
     assume(not re.match(MOD_CONFIG_HOST_PATTERN, payload["host"]))
     with pytest.raises(ValidationError):
         ModConfig(**payload)
 
 
-@given(mod_config_payload(description_strategy=text()))
+@given(
+    mod_config_payload(
+        description_strategy=text(max_size=MOD_CONFIG_DESCRIPTION_MAX_LENGTH)
+    )
+)
 def test_config_invalid_description_with_newline(payload: dict):
     description = payload["description"]
     index = random.randint(0, len(description))
@@ -69,6 +87,7 @@ def test_config_invalid_description_with_newline(payload: dict):
         ModConfig(**payload)
 
 
+@pytest.mark.extra
 @given(
     mod_config_payload(
         description_strategy=text(
@@ -82,13 +101,13 @@ def test_config_invalid_description_min_length(payload: dict):
         ModConfig(**payload)
 
 
+@pytest.mark.extra
+@pytest.mark.expensive
 @given(
     mod_config_payload(
         description_strategy=text(
             min_size=MOD_CONFIG_DESCRIPTION_MAX_LENGTH + 1,
-            max_size=(
-                MOD_CONFIG_DESCRIPTION_MAX_LENGTH + 2
-            ),  # NOTE: we only really care about violating the max length validator
+            max_size=MOD_CONFIG_DESCRIPTION_MAX_LENGTH + 1,
             alphabet=characters(blacklist_categories=["Cc", "Zl"]),
         )
     )
@@ -98,13 +117,14 @@ def test_config_invalid_description_max_length(payload: dict):
         ModConfig(**payload)
 
 
-@given(mod_config_payload(version_strategy=text()))
+@given(mod_config_payload(version_strategy=text(max_size=TEST_TEXT_SAMPLE_SIZE)))
 def test_config_invalid_version(payload: dict):
     with pytest.raises(ValidationError):
         ModConfig(**payload)
 
 
-@given(mod_config_payload(author_strategy=text()))
+@pytest.mark.extra
+@given(mod_config_payload(author_strategy=text(max_size=TEST_TEXT_SAMPLE_SIZE)))
 def test_config_invalid_author(payload: dict):
     try:
         # NOTE: here we are explicitly ensuring that the email
@@ -113,6 +133,25 @@ def test_config_invalid_author(payload: dict):
         assume(False)
     except EmailError:
         pass
+
+    with pytest.raises(ValidationError):
+        ModConfig(**payload)
+
+
+@pytest.mark.extra
+@given(
+    mod_config_payload(
+        contributors_strategy=lists(text(max_size=TEST_TEXT_SAMPLE_SIZE), min_size=1)
+    )
+)
+def test_config_invalid_contributors(payload: dict):
+
+    for contributor in payload["contributors"]:
+        try:
+            validate_email(contributor)
+            assume(False)
+        except EmailError:
+            break
 
     with pytest.raises(ValidationError):
         ModConfig(**payload)

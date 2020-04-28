@@ -32,6 +32,7 @@ def test_spec_valid(payload: dict):
     assert isinstance(config, SpecConfig)
 
 
+@pytest.mark.extra
 @given(
     spec_config_payload(
         version_strategy=integers(max_value=SPEC_CONFIG_VERSION_MIN - 1)
@@ -42,6 +43,7 @@ def test_spec_invalid_version_min(payload: dict):
         SpecConfig(**payload)
 
 
+@pytest.mark.extra
 @given(
     spec_config_payload(
         version_strategy=integers(min_value=SPEC_CONFIG_VERSION_MAX + 1)
