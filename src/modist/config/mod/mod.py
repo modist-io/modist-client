@@ -10,6 +10,7 @@ from semver import VersionInfo
 from pydantic import Field, HttpUrl, BaseModel, NameEmail, validator
 
 from .meta import MetaConfig
+from .require import RequireConfig
 
 MOD_CONFIG_NAME_MIN_LENGTH = 3
 MOD_CONFIG_NAME_MAX_LENGTH = 64
@@ -105,6 +106,11 @@ class ModConfig(BaseModel):
         title="Meta",
         description="Metadata of the mod configuration format",
         default_factory=MetaConfig,
+    )
+    require: RequireConfig = Field(
+        title="Require",
+        description="Requirements for the mod",
+        default_factory=RequireConfig,
     )
 
     @validator("description")

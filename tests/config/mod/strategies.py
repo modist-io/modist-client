@@ -16,6 +16,7 @@ from hypothesis.strategies import (
     composite,
     characters,
     from_regex,
+    sampled_from,
 )
 from hypothesis.provisional import urls
 
@@ -30,6 +31,7 @@ from modist.config.mod.mod import (
     MOD_CONFIG_DESCRIPTION_MIN_LENGTH,
 )
 from modist.config.mod.meta import SPEC_CONFIG_VERSION_MAX, SPEC_CONFIG_VERSION_MIN
+from modist.config.mod.require import OperatingSystem
 
 from ...strategies import name_email, semver_version
 
@@ -61,6 +63,22 @@ def meta_config_payload(
 
 
 @composite
+def require_config_payload(
+    draw, os_strategy: Optional[SearchStrategy[List[str]]] = None
+) -> dict:
+    """Composite strategy for building a require config payload."""
+
+    operating_systems = [_.value for _ in OperatingSystem.__members__.values()]
+    return {
+        "os": draw(
+            one_of([lists(sampled_from(operating_systems), unique=True), none()])
+            if not os_strategy
+            else os_strategy
+        )
+    }
+
+
+@composite
 def mod_config_payload(
     draw,
     name_strategy: Optional[SearchStrategy[str]] = None,
@@ -75,6 +93,7 @@ def mod_config_payload(
     exclude_strategy: Optional[SearchStrategy[List[str]]] = None,
     homepage_strategy: Optional[SearchStrategy[Optional[str]]] = None,
     meta_strategy: Optional[SearchStrategy[dict]] = None,
+    require_strategy: Optional[SearchStrategy[dict]] = None,
 ) -> dict:
     """Composite strategy for building a mod config payload."""
 
@@ -145,4 +164,7 @@ def mod_config_payload(
             one_of([urls(), none()]) if not homepage_strategy else homepage_strategy
         ),
         "meta": draw(meta_config_payload() if not meta_strategy else meta_strategy),
+        "require": draw(
+            require_config_payload() if not require_strategy else require_strategy
+        ),
     }
