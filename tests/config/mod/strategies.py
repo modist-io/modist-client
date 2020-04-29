@@ -8,13 +8,16 @@ from typing import List, Optional
 
 from hypothesis.strategies import (
     SearchStrategy,
+    none,
     text,
     lists,
+    one_of,
     integers,
     composite,
     characters,
     from_regex,
 )
+from hypothesis.provisional import urls
 
 from modist.config.mod.mod import (
     MOD_CONFIG_HOST_PATTERN,
@@ -70,6 +73,7 @@ def mod_config_payload(
     categories_strategy: Optional[SearchStrategy[List[str]]] = None,
     include_strategy: Optional[SearchStrategy[List[str]]] = None,
     exclude_strategy: Optional[SearchStrategy[List[str]]] = None,
+    homepage_strategy: Optional[SearchStrategy[Optional[str]]] = None,
     meta_strategy: Optional[SearchStrategy[dict]] = None,
 ) -> dict:
     """Composite strategy for building a mod config payload."""
@@ -136,6 +140,9 @@ def mod_config_payload(
             )
             if not exclude_strategy
             else exclude_strategy
+        ),
+        "homepage": draw(
+            one_of([urls(), none()]) if not homepage_strategy else homepage_strategy
         ),
         "meta": draw(meta_config_payload() if not meta_strategy else meta_strategy),
     }

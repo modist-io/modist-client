@@ -6,6 +6,7 @@
 
 import re
 import random
+from urllib.parse import urlparse
 
 import pytest
 from pydantic import ValidationError
@@ -251,5 +252,21 @@ def test_config_invalid_categories(payload: dict):
 )
 def test_config_invalid_categories_duplicates(payload: dict):
     payload["categories"].append(payload["categories"][-1])
+    with pytest.raises(ValidationError):
+        ModConfig(**payload)
+
+
+@pytest.mark.extra
+@given(mod_config_payload(homepage_strategy=text()))
+def test_config_invalid_homepage(payload: dict):
+    try:
+        # NOTE: because we are utilizing an HttpUrl for the homepage field, the easiest
+        # way of ensuring some text violates the homepage validation is to make sure the
+        # scheme is not provided
+        if len(urlparse(payload["homepage"]).scheme) > 0:
+            assume(False)
+    except ValueError:
+        pass
+
     with pytest.raises(ValidationError):
         ModConfig(**payload)

@@ -4,10 +4,10 @@
 
 """Contains the root mod section of the mod configuration."""
 
-from typing import List
+from typing import List, Optional
 
 from semver import VersionInfo
-from pydantic import Field, BaseModel, NameEmail, validator
+from pydantic import Field, HttpUrl, BaseModel, NameEmail, validator
 
 from .meta import MetaConfig
 
@@ -95,6 +95,11 @@ class ModConfig(BaseModel):
         default=[],
         title="Mod Excludes",
         description="Describes patterns for files that shouldn't be bundled in the mod",
+    )
+    homepage: Optional[HttpUrl] = Field(
+        default=None,
+        title="Mod Homepage",
+        description="Describes an external homepage for the mod",
     )
     meta: MetaConfig = Field(
         title="Meta",
