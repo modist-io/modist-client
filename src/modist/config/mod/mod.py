@@ -6,10 +6,10 @@
 
 from typing import List, Optional
 
-from semver import VersionInfo
 from pydantic import Field, HttpUrl, BaseModel, NameEmail, validator
 
 from .meta import MetaConfig
+from .._types import SemanticVersion
 from .require import RequireConfig
 
 MOD_CONFIG_NAME_MIN_LENGTH = 3
@@ -38,8 +38,10 @@ class ModConfig(BaseModel):
         """Configuration for the mod config schema."""
 
         title = "Mod"
+        json_encoders = {SemanticVersion: str, NameEmail: str}
 
     name: str = Field(
+        ...,
         title="Mod Name",
         description="Describes the user-given slug identifying name of the mod",
         min_length=MOD_CONFIG_NAME_MIN_LENGTH,
@@ -47,18 +49,20 @@ class ModConfig(BaseModel):
         regex=MOD_CONFIG_NAME_PATTERN,
     )
     host: str = Field(
+        ...,
         title="Mod Host",
         description="Describes the host that the mod is built for",
         regex=MOD_CONFIG_HOST_PATTERN,
     )
     description: str = Field(
+        ...,
         title="Mod Description",
         description="Describes in a short one-liner the purpose of the mod",
         min_length=MOD_CONFIG_DESCRIPTION_MIN_LENGTH,
         max_length=MOD_CONFIG_DESCRIPTION_MAX_LENGTH,
     )
-    version: str = Field(
-        default=MOD_CONFIG_DEFAULT_VERSION,
+    version: SemanticVersion = Field(
+        ...,
         title="Mod Version",
         description="Contains the local mod's version information",
     )
@@ -126,20 +130,6 @@ class ModConfig(BaseModel):
         if value.count("\n") > 0:
             raise ValueError("should not have newlines")
 
-        return value
-
-    @validator("version")
-    def validate_version(cls, value: str) -> str:  # noqa
-        """Validate the given version number.
-
-        :param str value: The given version number
-        :raises ValueError: When the given version number is not valid semver
-        :return: The validated version number
-        :rtype: str
-        """
-
-        # NOTE: VersionInfo.parse will raise a ValueError on invalid semver strings
-        VersionInfo.parse(value)
         return value
 
     @validator("keywords")
