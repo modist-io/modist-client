@@ -20,7 +20,9 @@ from modist.config.mod.mod import (
     MOD_CONFIG_HOST_PATTERN,
     MOD_CONFIG_NAME_PATTERN,
     MOD_CONFIG_KEYWORD_PATTERN,
+    MOD_CONFIG_CATEGORY_PATTERN,
     MOD_CONFIG_KEYWORDS_MAX_LENGTH,
+    MOD_CONFIG_CATEGORIES_MAX_LENGTH,
     MOD_CONFIG_DESCRIPTION_MAX_LENGTH,
     MOD_CONFIG_DESCRIPTION_MIN_LENGTH,
 )
@@ -65,6 +67,7 @@ def mod_config_payload(
     author_strategy: Optional[SearchStrategy[str]] = None,
     contributors_strategy: Optional[SearchStrategy[List[str]]] = None,
     keywords_strategy: Optional[SearchStrategy[List[str]]] = None,
+    categories_strategy: Optional[SearchStrategy[List[str]]] = None,
     meta_strategy: Optional[SearchStrategy[dict]] = None,
 ) -> dict:
     """Composite strategy for building a mod config payload."""
@@ -104,6 +107,15 @@ def mod_config_payload(
             )
             if not keywords_strategy
             else keywords_strategy
+        ),
+        "categories": draw(
+            lists(
+                from_regex(MOD_CONFIG_CATEGORY_PATTERN, fullmatch=True),
+                max_size=MOD_CONFIG_CATEGORIES_MAX_LENGTH,
+                unique=True,
+            )
+            if not categories_strategy
+            else categories_strategy
         ),
         "meta": draw(meta_config_payload() if not meta_strategy else meta_strategy),
     }

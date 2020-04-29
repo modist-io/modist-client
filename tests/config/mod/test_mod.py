@@ -20,8 +20,9 @@ from modist.config.mod.mod import (
     MOD_CONFIG_KEYWORD_PATTERN,
     MOD_CONFIG_NAME_MAX_LENGTH,
     MOD_CONFIG_NAME_MIN_LENGTH,
-    MOD_CONFIG_KEYWORD_MIN_LENGTH,
+    MOD_CONFIG_CATEGORY_PATTERN,
     MOD_CONFIG_KEYWORDS_MAX_LENGTH,
+    MOD_CONFIG_CATEGORIES_MAX_LENGTH,
     MOD_CONFIG_DESCRIPTION_MAX_LENGTH,
     MOD_CONFIG_DESCRIPTION_MIN_LENGTH,
     ModConfig,
@@ -164,7 +165,7 @@ def test_config_invalid_contributors(payload: dict):
 @given(
     mod_config_payload(
         keywords_strategy=lists(
-            text(min_size=MOD_CONFIG_KEYWORD_MIN_LENGTH),
+            from_regex(MOD_CONFIG_CATEGORY_PATTERN, fullmatch=True),
             min_size=MOD_CONFIG_KEYWORDS_MAX_LENGTH + 1,
             unique=True,
         )
@@ -203,5 +204,52 @@ def test_config_invalid_keywords(payload: dict):
 )
 def test_config_invalid_keywords_duplicates(payload: dict):
     payload["keywords"].append(payload["keywords"][-1])
+    with pytest.raises(ValidationError):
+        ModConfig(**payload)
+
+
+@pytest.mark.extra
+@given(
+    mod_config_payload(
+        categories_strategy=lists(
+            from_regex(MOD_CONFIG_CATEGORY_PATTERN, fullmatch=True),
+            min_size=MOD_CONFIG_CATEGORIES_MAX_LENGTH + 1,
+            unique=True,
+        )
+    )
+)
+def test_config_invalid_categories_max_size(payload: dict):
+    with pytest.raises(ValidationError):
+        ModConfig(**payload)
+
+
+@pytest.mark.extra
+@given(
+    mod_config_payload(
+        categories_strategy=lists(
+            text(alphabet=characters(whitelist_categories=["Z"])),
+            min_size=1,
+            max_size=MOD_CONFIG_CATEGORIES_MAX_LENGTH,
+            unique=True,
+        )
+    )
+)
+def test_config_invalid_categories(payload: dict):
+    with pytest.raises(ValidationError):
+        ModConfig(**payload)
+
+
+@given(
+    mod_config_payload(
+        categories_strategy=lists(
+            from_regex(MOD_CONFIG_CATEGORY_PATTERN, fullmatch=True),
+            min_size=1,
+            max_size=MOD_CONFIG_CATEGORIES_MAX_LENGTH - 1,
+            unique=False,
+        )
+    )
+)
+def test_config_invalid_categories_duplicates(payload: dict):
+    payload["categories"].append(payload["categories"][-1])
     with pytest.raises(ValidationError):
         ModConfig(**payload)

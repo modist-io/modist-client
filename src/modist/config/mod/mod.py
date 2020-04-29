@@ -25,6 +25,9 @@ MOD_CONFIG_DEFAULT_VERSION = "0.0.1"
 MOD_CONFIG_KEYWORDS_MAX_LENGTH = 5
 MOD_CONFIG_KEYWORD_MIN_LENGTH = 3
 MOD_CONFIG_KEYWORD_PATTERN = r"\A[^\s]{3,}\Z"
+MOD_CONFIG_CATEGORIES_MAX_LENGTH = 5
+MOD_CONFIG_CATEGORY_MIN_LENGTH = 3
+MOD_CONFIG_CATEGORY_PATTERN = r"\A[^\s]{3,}\Z"
 
 
 class ModConfig(BaseModel):
@@ -75,6 +78,14 @@ class ModConfig(BaseModel):
         min_length=MOD_CONFIG_KEYWORD_MIN_LENGTH,
         regex=MOD_CONFIG_KEYWORD_PATTERN,
     )
+    categories: List[str] = Field(
+        default=[],
+        title="Mod Categories",
+        description="Categorizes the mod with defined categories",
+        max_items=MOD_CONFIG_CATEGORIES_MAX_LENGTH,
+        min_length=MOD_CONFIG_CATEGORY_MIN_LENGTH,
+        regex=MOD_CONFIG_CATEGORY_PATTERN,
+    )
     meta: MetaConfig = Field(
         title="Meta",
         description="Metadata of the mod configuration format",
@@ -112,6 +123,32 @@ class ModConfig(BaseModel):
 
     @validator("keywords")
     def validate_keywords(cls, value: List[str]) -> List[str]:  # noqa
+        """Validate the given keywords.
+
+        :param List[str] value: The list of keywords
+        :raises ValueError: When there are duplicates in the given list of keywords
+        :return: The validated list of keywords
+        :rtype: List[str]
+        """
+
+        if len(set(value)) != len(value):
+            raise ValueError("should not have duplicates")
+
+        return value
+
+    @validator("categories")
+    def validate_categories(cls, value: List[str]) -> List[str]:  # noqa
+        """Validate the given categories.
+
+        :param List[str] value: The list of categories
+        :raises ValueError: When there are duplicates in the list of categories
+        :return: The validated list of categories
+        :rtype: List[str]
+        """
+
+        # NOTE: purposeful duplication of validation logic from keywords as this will
+        # later be expanded for validating the categories against the targeted indexing
+        # service's supplied categories
         if len(set(value)) != len(value):
             raise ValueError("should not have duplicates")
 
