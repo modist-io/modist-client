@@ -68,6 +68,8 @@ def mod_config_payload(
     contributors_strategy: Optional[SearchStrategy[List[str]]] = None,
     keywords_strategy: Optional[SearchStrategy[List[str]]] = None,
     categories_strategy: Optional[SearchStrategy[List[str]]] = None,
+    include_strategy: Optional[SearchStrategy[List[str]]] = None,
+    exclude_strategy: Optional[SearchStrategy[List[str]]] = None,
     meta_strategy: Optional[SearchStrategy[dict]] = None,
 ) -> dict:
     """Composite strategy for building a mod config payload."""
@@ -116,6 +118,24 @@ def mod_config_payload(
             )
             if not categories_strategy
             else categories_strategy
+        ),
+        "include": draw(
+            lists(
+                text(
+                    alphabet=characters(blacklist_categories=["Po", "M", "Z", "S", "C"])
+                )
+            )
+            if not include_strategy
+            else include_strategy
+        ),
+        "exclude": draw(
+            lists(
+                text(
+                    alphabet=characters(blacklist_categories=["Po", "M", "Z", "S", "C"])
+                )
+            )
+            if not exclude_strategy
+            else exclude_strategy
         ),
         "meta": draw(meta_config_payload() if not meta_strategy else meta_strategy),
     }

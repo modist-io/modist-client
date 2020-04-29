@@ -86,6 +86,16 @@ class ModConfig(BaseModel):
         min_length=MOD_CONFIG_CATEGORY_MIN_LENGTH,
         regex=MOD_CONFIG_CATEGORY_PATTERN,
     )
+    include: List[str] = Field(
+        default=[],
+        title="Mod Includes",
+        description="Describes patterns for files that should be bundled in the mod",
+    )
+    exclude: List[str] = Field(
+        default=[],
+        title="Mod Excludes",
+        description="Describes patterns for files that shouldn't be bundled in the mod",
+    )
     meta: MetaConfig = Field(
         title="Meta",
         description="Metadata of the mod configuration format",
