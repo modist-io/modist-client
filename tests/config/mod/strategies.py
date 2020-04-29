@@ -19,6 +19,7 @@ from hypothesis.strategies import (
 from modist.config.mod.mod import (
     MOD_CONFIG_HOST_PATTERN,
     MOD_CONFIG_NAME_PATTERN,
+    MOD_CONFIG_KEYWORDS_MAX_LENGTH,
     MOD_CONFIG_DESCRIPTION_MAX_LENGTH,
     MOD_CONFIG_DESCRIPTION_MIN_LENGTH,
 )
@@ -62,6 +63,7 @@ def mod_config_payload(
     version_strategy: Optional[SearchStrategy[str]] = None,
     author_strategy: Optional[SearchStrategy[str]] = None,
     contributors_strategy: Optional[SearchStrategy[List[str]]] = None,
+    keywords_strategy: Optional[SearchStrategy[List[str]]] = None,
     meta_strategy: Optional[SearchStrategy[dict]] = None,
 ) -> dict:
     """Composite strategy for building a mod config payload."""
@@ -92,6 +94,11 @@ def mod_config_payload(
         "author": draw(name_email() if not author_strategy else author_strategy),
         "contributors": draw(
             lists(name_email()) if not contributors_strategy else contributors_strategy
+        ),
+        "keywords": draw(
+            lists(text(), max_size=MOD_CONFIG_KEYWORDS_MAX_LENGTH)
+            if not keywords_strategy
+            else keywords_strategy
         ),
         "meta": draw(meta_config_payload() if not meta_strategy else meta_strategy),
     }

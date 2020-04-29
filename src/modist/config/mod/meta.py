@@ -4,9 +4,7 @@
 
 """Contains the meta section of the mod configuration."""
 
-from pydantic.main import BaseModel
-from pydantic.fields import Field
-
+from pydantic import Field, BaseModel
 
 SPEC_CONFIG_DEFAULT_VERSION = 1
 SPEC_CONFIG_VERSION_MIN = 1

@@ -6,9 +6,9 @@
 """
 
 import pytest
+from pydantic import ValidationError
 from hypothesis import given
 from hypothesis.strategies import integers
-from pydantic.error_wrappers import ValidationError
 
 from modist.config.mod.meta import (
     SPEC_CONFIG_VERSION_MAX,

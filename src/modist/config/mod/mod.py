@@ -7,10 +7,7 @@
 from typing import List
 
 from semver import VersionInfo
-from pydantic.main import BaseModel
-from pydantic.fields import Field
-from pydantic.networks import NameEmail
-from pydantic.class_validators import validator
+from pydantic import Field, BaseModel, NameEmail, validator
 
 from .meta import MetaConfig
 
@@ -25,6 +22,7 @@ MOD_CONFIG_HOST_PATTERN = (
 MOD_CONFIG_DESCRIPTION_MIN_LENGTH = 3
 MOD_CONFIG_DESCRIPTION_MAX_LENGTH = 240
 MOD_CONFIG_DEFAULT_VERSION = "0.0.1"
+MOD_CONFIG_KEYWORDS_MAX_LENGTH = 5
 
 
 class ModConfig(BaseModel):
@@ -66,6 +64,12 @@ class ModConfig(BaseModel):
         default=[],
         title="Mod Contributors",
         description="Describes any contributors to the mod and a way of contact",
+    )
+    keywords: List[str] = Field(
+        default=[],
+        title="Mod Keywords",
+        description="Tags the mod with specific keywords",
+        max_items=MOD_CONFIG_KEYWORDS_MAX_LENGTH,
     )
     meta: MetaConfig = Field(
         title="Meta",

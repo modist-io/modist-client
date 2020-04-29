@@ -8,17 +8,18 @@ import re
 import random
 
 import pytest
+from pydantic import ValidationError
 from hypothesis import given, assume
 from pydantic.errors import EmailError
 from pydantic.networks import validate_email
 from hypothesis.strategies import text, lists, characters
-from pydantic.error_wrappers import ValidationError
 
 from modist.config.mod.mod import (
     MOD_CONFIG_HOST_PATTERN,
     MOD_CONFIG_NAME_PATTERN,
     MOD_CONFIG_NAME_MAX_LENGTH,
     MOD_CONFIG_NAME_MIN_LENGTH,
+    MOD_CONFIG_KEYWORDS_MAX_LENGTH,
     MOD_CONFIG_DESCRIPTION_MAX_LENGTH,
     MOD_CONFIG_DESCRIPTION_MIN_LENGTH,
     ModConfig,
@@ -153,5 +154,16 @@ def test_config_invalid_contributors(payload: dict):
         except EmailError:
             break
 
+    with pytest.raises(ValidationError):
+        ModConfig(**payload)
+
+
+@pytest.mark.extra
+@given(
+    mod_config_payload(
+        keywords_strategy=lists(text(), min_size=MOD_CONFIG_KEYWORDS_MAX_LENGTH + 1)
+    )
+)
+def test_config_invalid_keywords_max_size(payload: dict):
     with pytest.raises(ValidationError):
         ModConfig(**payload)
