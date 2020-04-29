@@ -12,13 +12,15 @@ from pydantic import ValidationError
 from hypothesis import given, assume
 from pydantic.errors import EmailError
 from pydantic.networks import validate_email
-from hypothesis.strategies import text, lists, characters
+from hypothesis.strategies import text, lists, characters, from_regex
 
 from modist.config.mod.mod import (
     MOD_CONFIG_HOST_PATTERN,
     MOD_CONFIG_NAME_PATTERN,
+    MOD_CONFIG_KEYWORD_PATTERN,
     MOD_CONFIG_NAME_MAX_LENGTH,
     MOD_CONFIG_NAME_MIN_LENGTH,
+    MOD_CONFIG_KEYWORD_MIN_LENGTH,
     MOD_CONFIG_KEYWORDS_MAX_LENGTH,
     MOD_CONFIG_DESCRIPTION_MAX_LENGTH,
     MOD_CONFIG_DESCRIPTION_MIN_LENGTH,
@@ -57,7 +59,7 @@ def test_config_invalid_name_min_length(payload: dict):
     mod_config_payload(
         name_strategy=text(
             min_size=MOD_CONFIG_NAME_MAX_LENGTH + 1,
-            max_size=MOD_CONFIG_DESCRIPTION_MAX_LENGTH + 1,
+            max_size=MOD_CONFIG_NAME_MAX_LENGTH + 1,
         )
     )
 )
@@ -161,9 +163,45 @@ def test_config_invalid_contributors(payload: dict):
 @pytest.mark.extra
 @given(
     mod_config_payload(
-        keywords_strategy=lists(text(), min_size=MOD_CONFIG_KEYWORDS_MAX_LENGTH + 1)
+        keywords_strategy=lists(
+            text(min_size=MOD_CONFIG_KEYWORD_MIN_LENGTH),
+            min_size=MOD_CONFIG_KEYWORDS_MAX_LENGTH + 1,
+            unique=True,
+        )
     )
 )
 def test_config_invalid_keywords_max_size(payload: dict):
+    with pytest.raises(ValidationError):
+        ModConfig(**payload)
+
+
+@pytest.mark.extra
+@given(
+    mod_config_payload(
+        keywords_strategy=lists(
+            text(alphabet=characters(whitelist_categories=["Z"])),
+            min_size=1,
+            max_size=MOD_CONFIG_KEYWORDS_MAX_LENGTH,
+            unique=True,
+        )
+    )
+)
+def test_config_invalid_keywords(payload: dict):
+    with pytest.raises(ValidationError):
+        ModConfig(**payload)
+
+
+@given(
+    mod_config_payload(
+        keywords_strategy=lists(
+            from_regex(MOD_CONFIG_KEYWORD_PATTERN, fullmatch=True),
+            min_size=1,
+            max_size=MOD_CONFIG_KEYWORDS_MAX_LENGTH - 1,
+            unique=False,
+        )
+    )
+)
+def test_config_invalid_keywords_duplicates(payload: dict):
+    payload["keywords"].append(payload["keywords"][-1])
     with pytest.raises(ValidationError):
         ModConfig(**payload)

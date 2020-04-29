@@ -23,6 +23,8 @@ MOD_CONFIG_DESCRIPTION_MIN_LENGTH = 3
 MOD_CONFIG_DESCRIPTION_MAX_LENGTH = 240
 MOD_CONFIG_DEFAULT_VERSION = "0.0.1"
 MOD_CONFIG_KEYWORDS_MAX_LENGTH = 5
+MOD_CONFIG_KEYWORD_MIN_LENGTH = 3
+MOD_CONFIG_KEYWORD_PATTERN = r"\A[^\s]{3,}\Z"
 
 
 class ModConfig(BaseModel):
@@ -70,6 +72,8 @@ class ModConfig(BaseModel):
         title="Mod Keywords",
         description="Tags the mod with specific keywords",
         max_items=MOD_CONFIG_KEYWORDS_MAX_LENGTH,
+        min_length=MOD_CONFIG_KEYWORD_MIN_LENGTH,
+        regex=MOD_CONFIG_KEYWORD_PATTERN,
     )
     meta: MetaConfig = Field(
         title="Meta",
@@ -104,4 +108,11 @@ class ModConfig(BaseModel):
 
         # NOTE: VersionInfo.parse will raise a ValueError on invalid semver strings
         VersionInfo.parse(value)
+        return value
+
+    @validator("keywords")
+    def validate_keywords(cls, value: List[str]) -> List[str]:  # noqa
+        if len(set(value)) != len(value):
+            raise ValueError("should not have duplicates")
+
         return value

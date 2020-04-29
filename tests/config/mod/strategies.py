@@ -19,6 +19,7 @@ from hypothesis.strategies import (
 from modist.config.mod.mod import (
     MOD_CONFIG_HOST_PATTERN,
     MOD_CONFIG_NAME_PATTERN,
+    MOD_CONFIG_KEYWORD_PATTERN,
     MOD_CONFIG_KEYWORDS_MAX_LENGTH,
     MOD_CONFIG_DESCRIPTION_MAX_LENGTH,
     MOD_CONFIG_DESCRIPTION_MIN_LENGTH,
@@ -96,7 +97,11 @@ def mod_config_payload(
             lists(name_email()) if not contributors_strategy else contributors_strategy
         ),
         "keywords": draw(
-            lists(text(), max_size=MOD_CONFIG_KEYWORDS_MAX_LENGTH)
+            lists(
+                from_regex(MOD_CONFIG_KEYWORD_PATTERN, fullmatch=True),
+                max_size=MOD_CONFIG_KEYWORDS_MAX_LENGTH,
+                unique=True,
+            )
             if not keywords_strategy
             else keywords_strategy
         ),
