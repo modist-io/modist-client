@@ -31,7 +31,7 @@ from modist.config.mod.mod import (
     MOD_CONFIG_DESCRIPTION_MIN_LENGTH,
 )
 from modist.config.mod.meta import SPEC_CONFIG_VERSION_MAX, SPEC_CONFIG_VERSION_MIN
-from modist.config.mod.require import OperatingSystem
+from modist.config.mod.require import OperatingSystem, ProcessorArchitecture
 
 from ...strategies import name_email, semver_version
 
@@ -64,17 +64,27 @@ def meta_config_payload(
 
 @composite
 def require_config_payload(
-    draw, os_strategy: Optional[SearchStrategy[List[str]]] = None
+    draw,
+    os_strategy: Optional[SearchStrategy[List[str]]] = None,
+    arch_strategy: Optional[SearchStrategy[List[str]]] = None,
 ) -> dict:
     """Composite strategy for building a require config payload."""
 
     operating_systems = [_.value for _ in OperatingSystem.__members__.values()]
+    processor_architectures = [
+        _.value for _ in ProcessorArchitecture.__members__.values()
+    ]
     return {
         "os": draw(
             one_of([lists(sampled_from(operating_systems), unique=True), none()])
             if not os_strategy
             else os_strategy
-        )
+        ),
+        "arch": draw(
+            one_of([lists(sampled_from(processor_architectures), unique=True), none()])
+            if not arch_strategy
+            else arch_strategy
+        ),
     }
 
 
