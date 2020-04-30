@@ -3,3 +3,27 @@
 # ISC License <https://choosealicense.com/licenses/isc>
 
 """Contains unit tests for the module."""
+
+import os
+import sys
+
+from hypothesis import HealthCheck, settings
+
+settings.register_profile("default", max_examples=5)
+settings.register_profile(
+    "ci", suppress_health_check=[HealthCheck.too_slow], max_examples=30
+)
+settings.register_profile(
+    "windows",
+    suppress_health_check=[HealthCheck.too_slow],
+    max_examples=10,
+    deadline=None,
+)
+
+settings.load_profile("default")
+
+if sys.platform in ("win32",):
+    settings.load_profile("windows")
+
+if os.environ.get("CI", None) == "true":
+    settings.load_profile("ci")

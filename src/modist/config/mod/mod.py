@@ -6,6 +6,7 @@
 
 from typing import List, Optional
 
+from semver import VersionInfo
 from pydantic import Field, HttpUrl, BaseModel, NameEmail, validator
 
 from .meta import MetaConfig
@@ -38,7 +39,7 @@ class ModConfig(BaseModel):
         """Configuration for the mod config schema."""
 
         title = "Mod"
-        json_encoders = {SemanticVersion: str, NameEmail: str}
+        json_encoders = {VersionInfo: str, NameEmail: str}
 
     name: str = Field(
         ...,

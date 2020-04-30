@@ -10,7 +10,7 @@ from urllib.parse import urlparse
 
 import pytest
 from pydantic import ValidationError
-from hypothesis import given, assume
+from hypothesis import HealthCheck, given, assume, settings
 from pydantic.errors import EmailError
 from pydantic.networks import validate_email
 from hypothesis.strategies import text, lists, characters, from_regex
@@ -57,6 +57,7 @@ def test_config_invalid_name_min_length(payload: dict):
 
 @pytest.mark.extra
 @pytest.mark.expensive
+@settings(suppress_health_check=(HealthCheck.too_slow,))
 @given(
     mod_config_payload(
         name_strategy=text(
@@ -108,6 +109,7 @@ def test_config_invalid_description_min_length(payload: dict):
 
 @pytest.mark.extra
 @pytest.mark.expensive
+@settings(suppress_health_check=(HealthCheck.too_slow,))
 @given(
     mod_config_payload(
         description_strategy=text(
