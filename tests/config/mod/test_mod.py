@@ -81,14 +81,16 @@ def test_config_invalid_host(payload: dict):
 
 @given(
     mod_config_payload(
-        description_strategy=text(max_size=MOD_CONFIG_DESCRIPTION_MAX_LENGTH)
+        description_strategy=text(
+            max_size=MOD_CONFIG_DESCRIPTION_MAX_LENGTH,
+            min_size=MOD_CONFIG_DESCRIPTION_MIN_LENGTH,
+        )
     )
 )
 def test_config_invalid_description_with_newline(payload: dict):
     description = payload["description"]
     index = random.randint(0, len(description))
     payload["description"] = description[:index] + "\n" + description[:index]
-
     with pytest.raises(ValidationError):
         ModConfig(**payload)
 
