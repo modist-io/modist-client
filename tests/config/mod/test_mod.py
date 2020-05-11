@@ -37,6 +37,7 @@ TEST_TEXT_SAMPLE_SIZE = 12
 @given(mod_config_payload())
 def test_config_valid(payload: dict):
     config = ModConfig(**payload)
+    print(config)
     assert isinstance(config, ModConfig)
 
 

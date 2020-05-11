@@ -11,10 +11,12 @@ from hypothesis.strategies import (
     SearchStrategy,
     characters,
     composite,
+    dictionaries,
     from_regex,
     integers,
     lists,
     none,
+    nothing,
     one_of,
     sampled_from,
     text,
@@ -33,7 +35,7 @@ from modist.config.mod.mod import (
 )
 from modist.config.mod.require import OperatingSystem, ProcessorArchitecture
 
-from ...strategies import name_email, semver_version
+from ...strategies import name_email, semver_spec, semver_version
 
 
 @composite
@@ -63,10 +65,22 @@ def meta_config_payload(
 
 
 @composite
+def require_host_config_payload(
+    draw, version_strategy: Optional[SearchStrategy[str]] = None
+) -> dict:
+    """Composite strategy for building a host require config payload."""
+
+    return {
+        "version": draw(semver_spec() if not version_strategy else version_strategy)
+    }
+
+
+@composite
 def require_config_payload(
     draw,
     os_strategy: Optional[SearchStrategy[List[str]]] = None,
     arch_strategy: Optional[SearchStrategy[List[str]]] = None,
+    host_strategy: Optional[SearchStrategy[dict]] = None,
 ) -> dict:
     """Composite strategy for building a require config payload."""
 
@@ -74,6 +88,7 @@ def require_config_payload(
     processor_architectures = [
         _.value for _ in ProcessorArchitecture.__members__.values()
     ]
+
     return {
         "os": draw(
             one_of([lists(sampled_from(operating_systems), unique=True), none()])
@@ -84,6 +99,11 @@ def require_config_payload(
             one_of([lists(sampled_from(processor_architectures), unique=True), none()])
             if not arch_strategy
             else arch_strategy
+        ),
+        "host": draw(
+            one_of(require_host_config_payload(), none())
+            if not host_strategy
+            else host_strategy
         ),
     }
 
@@ -104,6 +124,9 @@ def mod_config_payload(
     homepage_strategy: Optional[SearchStrategy[Optional[str]]] = None,
     meta_strategy: Optional[SearchStrategy[dict]] = None,
     require_strategy: Optional[SearchStrategy[dict]] = None,
+    depends_strategy: Optional[SearchStrategy[dict]] = None,
+    conflicts_strategy: Optional[SearchStrategy[dict]] = None,
+    peers_strategy: Optional[SearchStrategy[dict]] = None,
 ) -> dict:
     """Composite strategy for building a mod config payload."""
 
@@ -176,5 +199,25 @@ def mod_config_payload(
         "meta": draw(meta_config_payload() if not meta_strategy else meta_strategy),
         "require": draw(
             require_config_payload() if not require_strategy else require_strategy
+        ),
+        "depends": draw(
+            dictionaries(from_regex(MOD_CONFIG_NAME_PATTERN), semver_spec(), min_size=1)
+            if not depends_strategy
+            else depends_strategy
+        ),
+        "conflicts": draw(
+            dictionaries(from_regex(MOD_CONFIG_NAME_PATTERN), semver_spec(), min_size=1)
+            if not depends_strategy
+            else depends_strategy
+        ),
+        "peers": draw(
+            one_of(
+                dictionaries(
+                    from_regex(MOD_CONFIG_NAME_PATTERN), semver_spec(), min_size=1
+                ),
+                dictionaries(nothing(), nothing(), max_size=0),
+            )
+            if not depends_strategy
+            else depends_strategy
         ),
     }

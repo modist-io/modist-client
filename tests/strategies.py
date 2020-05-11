@@ -4,27 +4,31 @@
 
 """Contains strategies that are useful throughout all the module tests."""
 
-from typing import Any, Dict, List, Type, Optional
+from typing import Any, Dict, List, Optional, Type
 
-from pydantic import BaseModel, create_model
 from hypothesis import assume
 from hypothesis.strategies import (
     SearchStrategy,
-    none,
-    text,
     binary,
+    booleans,
     builds,
+    characters,
+    complex_numbers,
+    composite,
+    dictionaries,
     emails,
     floats,
-    one_of,
-    booleans,
-    integers,
-    composite,
-    characters,
     from_regex,
-    dictionaries,
-    complex_numbers,
+    integers,
+    just,
+    lists,
+    none,
+    nothing,
+    one_of,
+    sampled_from,
+    text,
 )
+from pydantic import BaseModel, create_model
 
 
 @composite
@@ -159,8 +163,8 @@ def semver_version(
     if include_prerelesase or draw(booleans()):
         version += "-" + draw(
             from_regex(
-                r"\A((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)"
-                r"(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*)\Z"
+                r"\A((?:0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*)"
+                r"(?:\.(?:0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*))*)\Z"
             )
             if not prerelease_strategy
             else prerelease_strategy
@@ -174,3 +178,92 @@ def semver_version(
         )
 
     return version
+
+
+@composite
+def semver_spec_operator(
+    draw, operator_strategy: Optional[SearchStrategy[str]] = None
+) -> str:
+    """Composite strategy for building a semver spec operator symbol."""
+
+    return draw(
+        sampled_from(["==", "!=", "<=", ">=", "<", ">", "~=", "^=", "^", "~", ""])
+        if not operator_strategy
+        else operator_strategy
+    )
+
+
+@composite
+def semver_spec_version(
+    draw,
+    major_strategy: Optional[SearchStrategy[str]] = None,
+    minor_strategy: Optional[SearchStrategy[str]] = None,
+    patch_strategy: Optional[SearchStrategy[str]] = None,
+    **kwargs,
+) -> str:
+    """Composite strategy for building a semver spec version."""
+
+    return draw(
+        one_of(
+            semver_version(
+                major_strategy=(
+                    integers(min_value=0) if not major_strategy else major_strategy
+                ),
+                minor_strategy=(
+                    one_of(integers(min_value=0), just("*"))
+                    if not minor_strategy
+                    else minor_strategy
+                ),
+                patch_strategy=(
+                    one_of(integers(min_value=0), just("*"))
+                    if not patch_strategy
+                    else patch_strategy
+                ),
+                # TODO: prerelease and builds ARE allowed in simple specs but need to
+                # have varying strategies based on major, minor, and patch values
+                # which we can implement later
+                prerelease_strategy=nothing(),
+                build_strategy=nothing(),
+            ),
+            just("*"),
+        )
+    )
+
+
+@composite
+def semver_spec_clause(
+    draw,
+    operator_strategy: Optional[SearchStrategy[str]] = None,
+    version_strategy: Optional[SearchStrategy[str]] = None,
+) -> str:
+    """Composite strategy for building a semver spec clause.
+
+    This strategy simply builds a clause from a single operator and single version. To
+    get an entire expression (multiple clauses), just pull from the ``semver_spec``
+    strategy.
+    """
+
+    version: str = draw(
+        semver_spec_version() if not version_strategy else version_strategy
+    )
+    operator = ""
+    if version != "*":
+        operator = draw(
+            semver_spec_operator() if not operator_strategy else operator_strategy
+        )
+    return f"{operator!s}{version!s}"
+
+
+@composite
+def semver_spec(
+    draw, spec_clause_strategy: Optional[SearchStrategy[List[str]]] = None
+) -> str:
+    """Composite strategy for building a semver spec expression."""
+
+    return ",".join(
+        draw(
+            lists(semver_spec_clause(), min_size=1)
+            if not spec_clause_strategy
+            else spec_clause_strategy
+        )
+    )
