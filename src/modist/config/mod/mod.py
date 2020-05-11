@@ -4,12 +4,12 @@
 
 """Contains the root mod section of the mod configuration."""
 
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from pydantic import Field, HttpUrl, NameEmail, validator
 
 from .._common import BaseConfig
-from .._types import SemanticVersion
+from .._types import SemanticSpec, SemanticVersion
 from .meta import MetaConfig
 from .require import RequireConfig
 
@@ -107,9 +107,24 @@ class ModConfig(BaseConfig):
         default_factory=MetaConfig,
     )
     require: RequireConfig = Field(
-        title="Require",
+        title="Mod Requirements",
         description="Requirements for the mod",
         default_factory=RequireConfig,
+    )
+    depends: Dict[str, SemanticSpec] = Field(
+        default={},
+        title="Mod Dependencies",
+        description="Necessary mod dependencies for the mod",
+    )
+    conflicts: Dict[str, SemanticSpec] = Field(
+        default={},
+        title="Mod Conflits",
+        description="Known conflicting mods of the mod",
+    )
+    peers: Dict[str, SemanticSpec] = Field(
+        default={},
+        title="Mod Peers",
+        description="Suggested mods that are either enhanced by or enhance the mod",
     )
 
     @validator("description")
