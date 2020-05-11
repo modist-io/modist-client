@@ -9,9 +9,9 @@ import re
 from typing import Any, Type
 
 import pytest
-from semver import VersionInfo
 from pydantic import BaseModel, ValidationError
 from hypothesis import given
+from semantic_version import Version
 from hypothesis.strategies import just
 
 from modist.config._types import SemanticVersion
@@ -25,7 +25,7 @@ from ..strategies import builtins, pydantic_model, semver_version
 )
 def test_SemanticVersion_valid(model: Type[BaseModel], semver_version: str):
     instance = model(version=semver_version)
-    assert isinstance(instance.version, VersionInfo)  # type: ignore
+    assert isinstance(instance.version, Version)  # type: ignore
 
 
 @given(pydantic_model(fields_strategy=just({"version": (SemanticVersion, ...)})))

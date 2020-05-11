@@ -4,14 +4,13 @@
 
 """Contains custom Pydantic types for use in configuration models."""
 
-import re
 from typing import Callable, Generator
 
-from semver import _REGEX, VersionInfo
+from semantic_version import Version, validate
 
 
-class SemanticVersion(VersionInfo):
-    """Custom subclass of ``semver.VersionInfo`` for pydantic field support.
+class SemanticVersion(Version):
+    """Custom subclass of :class:`semantic_version.Version` for pydantic field support.
 
     Use this class just like a regular ol' pydantic field:
     >>> from ._types import SemanticVersion
@@ -36,29 +35,30 @@ class SemanticVersion(VersionInfo):
     def __get_validators__(
         cls,
     ) -> Generator[Callable[[str], "SemanticVersion"], None, None]:
-        """Yield the necessary validators for the input string."""
+        """Yield the necessary validator for the input string."""
 
         yield cls.validate
 
     @classmethod
     def __modify_schema__(cls, field_schema: dict):
-        """Modify the pydantic build JSONSchema for this specific field.
+        """Modify the pydantic build JSONSchema for this specified field.
 
         :param dict field_schema: The current field schema, pre-modification
         """
 
         field_schema.update(
             type="string",
-            pattern=re.sub(r"\s", "", _REGEX.pattern),
-            examples=["1.0.0", "12.34.45-postrelease.1+build.891328232"],
+            pattern=Version.version_re.pattern,
+            examples=["1.0.0", "12.34.56-postrelease.1+build.891328232"],
         )
 
     @classmethod
-    def validate(cls, value: str) -> VersionInfo:
+    def validate(cls, value: str) -> Version:
         """Validate a given string and return an instance of the custom type.
 
         :param str value: The value to validate and use for instance building
         :raises TypeError: If the given value is not a string
+        :raises ValueError: if the given value is not a valid Semver string
         :return: An instance of ``semver.VersionInfo`` if validated
         :rtype: VersionInfo
         """
@@ -66,4 +66,9 @@ class SemanticVersion(VersionInfo):
         if not isinstance(value, str):
             raise TypeError("string required")
 
-        return cls.parse(value)
+        # NOTE: semantic-version provides it's own validate() method that returns a
+        # boolean if the given value is a valid Semver string
+        if not validate(value):
+            raise ValueError(f"value {value!r} is not a valid SemVer string")
+
+        return cls(value)
