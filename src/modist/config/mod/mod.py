@@ -6,9 +6,9 @@
 
 from typing import List, Optional
 
-from pydantic import BaseModel, Field, HttpUrl, NameEmail, validator
-from semver import VersionInfo
+from pydantic import Field, HttpUrl, NameEmail, validator
 
+from .._common import BaseConfig
 from .._types import SemanticVersion
 from .meta import MetaConfig
 from .require import RequireConfig
@@ -32,14 +32,8 @@ MOD_CONFIG_CATEGORY_MIN_LENGTH = 3
 MOD_CONFIG_CATEGORY_PATTERN = r"\A[^\s]{3,}\Z"
 
 
-class ModConfig(BaseModel):
+class ModConfig(BaseConfig):
     """Defines the structure of the base mod config."""
-
-    class Config:
-        """Configuration for the mod config schema."""
-
-        title = "Mod"
-        json_encoders = {VersionInfo: str, NameEmail: str}
 
     name: str = Field(
         ...,

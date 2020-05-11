@@ -4,14 +4,16 @@
 
 """Contains the meta section of the mod configuration."""
 
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+from .._common import BaseConfig
 
 SPEC_CONFIG_DEFAULT_VERSION = 1
 SPEC_CONFIG_VERSION_MIN = 1
 SPEC_CONFIG_VERSION_MAX = SPEC_CONFIG_DEFAULT_VERSION
 
 
-class SpecConfig(BaseModel):
+class SpecConfig(BaseConfig):
     """Defines the structure of the meta spec config."""
 
     version: int = Field(
@@ -23,7 +25,7 @@ class SpecConfig(BaseModel):
     )
 
 
-class MetaConfig(BaseModel):
+class MetaConfig(BaseConfig):
     """Defines the structure of the mod meta config."""
 
     spec: SpecConfig = Field(

@@ -7,7 +7,10 @@
 from enum import Enum
 from typing import List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+from .._common import BaseConfig
+from .._types import SemanticSpec
 
 
 class OperatingSystem(Enum):
@@ -32,7 +35,17 @@ class ProcessorArchitecture(Enum):
     X64 = "x64"
 
 
-class RequireConfig(BaseModel):
+class HostConfig(BaseConfig):
+    """Defines the structure of the mod required host config."""
+
+    version: Optional[SemanticSpec] = Field(
+        None,
+        title="Host Version",
+        description="Describes the required host's version with a version selector",
+    )
+
+
+class RequireConfig(BaseConfig):
     """Defines the structure of the mod require config."""
 
     os: Optional[List[OperatingSystem]] = Field(
@@ -44,4 +57,9 @@ class RequireConfig(BaseModel):
         None,
         titles="Requires Architecture",
         description="Describes the supported architectures for the mod",
+    )
+    host: Optional[HostConfig] = Field(
+        None,
+        titles="Requires Host",
+        description="Describes the supported host for the mod",
     )
