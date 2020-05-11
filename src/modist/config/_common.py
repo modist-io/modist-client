@@ -2,9 +2,10 @@
 # Copyright (c) 2020 Modist Team <admin@modist.io>
 # ISC License <https://opensource.org/licenses/isc>
 
-"""
-"""
+"""Contains the base functionality all configs should have."""
 
+import rapidjson as json
+import toml
 from pydantic import BaseModel, NameEmail
 
 from ._types import SemanticSpec, SemanticVersion
@@ -26,3 +27,47 @@ class BaseConfig(BaseModel):
         """
 
         json_encoders = {SemanticSpec: str, SemanticVersion: str, NameEmail: str}
+        json_loads = json.loads
+        json_dumps = json.dumps
+
+    @classmethod
+    def from_json(cls, json_content: str) -> "BaseConfig":
+        """Load a new instance of the config from a JSON string.
+
+        :return: The JSON string to load the config instance from
+        :rtype: BaseConfig
+        """
+
+        return cls(**json.loads(json_content))
+
+    @classmethod
+    def from_toml(cls, toml_content: str) -> "BaseConfig":
+        """Load a new instance of the config from a TOML string.
+
+        :return: The TOML string to load teh config instance from
+        :rtype: BaseConfig
+        """
+
+        return cls(**toml.loads(toml_content))
+
+    def to_json(self, *args, **kwargs) -> str:
+        """Dump the config instance to a JSON string.
+
+        :return: The JSON representation of the config instance
+        :rtype: str
+        """
+
+        return self.json(*args, **kwargs)
+
+    def to_toml(self) -> str:
+        """Dump the config instance to a TOML string.
+
+        :return: The TOML representation of the config instance
+        :rtype: str
+        """
+
+        # NOTE: This is horrible, but we require the Pydantic model json encoders to run
+        # against the instance dict and we don't want to override their internals to do
+        # it ourselves. So the easiest way to get the JSON-serializable dictionary is to
+        # serialize the instance to JSON and deserialize it for TOML to dump
+        return toml.dumps(json.loads(self.to_json()))
