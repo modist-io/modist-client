@@ -6,31 +6,31 @@
 
 from typing import List, Optional
 
+from hypothesis.provisional import urls
 from hypothesis.strategies import (
     SearchStrategy,
-    none,
-    text,
-    lists,
-    one_of,
-    integers,
-    composite,
     characters,
+    composite,
     from_regex,
+    integers,
+    lists,
+    none,
+    one_of,
     sampled_from,
+    text,
 )
-from hypothesis.provisional import urls
 
+from modist.config.mod.meta import SPEC_CONFIG_VERSION_MAX, SPEC_CONFIG_VERSION_MIN
 from modist.config.mod.mod import (
-    MOD_CONFIG_HOST_PATTERN,
-    MOD_CONFIG_NAME_PATTERN,
-    MOD_CONFIG_KEYWORD_PATTERN,
-    MOD_CONFIG_CATEGORY_PATTERN,
-    MOD_CONFIG_KEYWORDS_MAX_LENGTH,
     MOD_CONFIG_CATEGORIES_MAX_LENGTH,
+    MOD_CONFIG_CATEGORY_PATTERN,
     MOD_CONFIG_DESCRIPTION_MAX_LENGTH,
     MOD_CONFIG_DESCRIPTION_MIN_LENGTH,
+    MOD_CONFIG_HOST_PATTERN,
+    MOD_CONFIG_KEYWORD_PATTERN,
+    MOD_CONFIG_KEYWORDS_MAX_LENGTH,
+    MOD_CONFIG_NAME_PATTERN,
 )
-from modist.config.mod.meta import SPEC_CONFIG_VERSION_MAX, SPEC_CONFIG_VERSION_MIN
 from modist.config.mod.require import OperatingSystem, ProcessorArchitecture
 
 from ...strategies import name_email, semver_version

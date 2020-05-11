@@ -4,28 +4,28 @@
 
 """Contains unit-tests for the mod configuration."""
 
-import re
 import random
+import re
 from urllib.parse import urlparse
 
 import pytest
+from hypothesis import HealthCheck, assume, given, settings
+from hypothesis.strategies import characters, from_regex, lists, text
 from pydantic import ValidationError
-from hypothesis import HealthCheck, given, assume, settings
 from pydantic.errors import EmailError
 from pydantic.networks import validate_email
-from hypothesis.strategies import text, lists, characters, from_regex
 
 from modist.config.mod.mod import (
-    MOD_CONFIG_HOST_PATTERN,
-    MOD_CONFIG_NAME_PATTERN,
-    MOD_CONFIG_KEYWORD_PATTERN,
-    MOD_CONFIG_NAME_MAX_LENGTH,
-    MOD_CONFIG_NAME_MIN_LENGTH,
-    MOD_CONFIG_CATEGORY_PATTERN,
-    MOD_CONFIG_KEYWORDS_MAX_LENGTH,
     MOD_CONFIG_CATEGORIES_MAX_LENGTH,
+    MOD_CONFIG_CATEGORY_PATTERN,
     MOD_CONFIG_DESCRIPTION_MAX_LENGTH,
     MOD_CONFIG_DESCRIPTION_MIN_LENGTH,
+    MOD_CONFIG_HOST_PATTERN,
+    MOD_CONFIG_KEYWORD_PATTERN,
+    MOD_CONFIG_KEYWORDS_MAX_LENGTH,
+    MOD_CONFIG_NAME_MAX_LENGTH,
+    MOD_CONFIG_NAME_MIN_LENGTH,
+    MOD_CONFIG_NAME_PATTERN,
     ModConfig,
 )
 

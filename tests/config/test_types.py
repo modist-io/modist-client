@@ -9,10 +9,10 @@ import re
 from typing import Any, Type
 
 import pytest
-from pydantic import BaseModel, ValidationError
 from hypothesis import given
-from semantic_version import Version
 from hypothesis.strategies import just
+from pydantic import BaseModel, ValidationError
+from semantic_version import Version
 
 from modist.config._types import SemanticVersion
 

@@ -7,7 +7,7 @@
 from enum import Enum
 from typing import List, Optional
 
-from pydantic import Field, BaseModel
+from pydantic import BaseModel, Field
 
 
 class OperatingSystem(Enum):

@@ -5,14 +5,14 @@
 """Contains unit-test for the mod configuration require section."""
 
 import pytest
+from hypothesis import assume, given
+from hypothesis.strategies import lists, text
 from pydantic import ValidationError
-from hypothesis import given, assume
-from hypothesis.strategies import text, lists
 
 from modist.config.mod.require import (
-    RequireConfig,
     OperatingSystem,
     ProcessorArchitecture,
+    RequireConfig,
 )
 
 from .strategies import require_config_payload

@@ -6,11 +6,11 @@
 
 from typing import List, Optional
 
+from pydantic import BaseModel, Field, HttpUrl, NameEmail, validator
 from semver import VersionInfo
-from pydantic import Field, HttpUrl, BaseModel, NameEmail, validator
 
-from .meta import MetaConfig
 from .._types import SemanticVersion
+from .meta import MetaConfig
 from .require import RequireConfig
 
 MOD_CONFIG_NAME_MIN_LENGTH = 3
