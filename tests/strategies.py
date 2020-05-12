@@ -116,13 +116,19 @@ def pydantic_model(
     draw,
     name_strategy: Optional[SearchStrategy[str]] = None,
     fields_strategy: Optional[SearchStrategy[Dict[str, Any]]] = None,
+    base_class: Optional[Type[BaseModel]] = None,
 ) -> Type[BaseModel]:
     """Composite strategy for building a random Pydantic model."""
 
     return create_model(
         draw(pythonic_name() if not name_strategy else name_strategy),
+        __base__=(BaseModel if not base_class else base_class),
         **draw(
-            dictionaries(pythonic_name(), builtins(exclude=[None, set]),)
+            dictionaries(
+                pythonic_name(),
+                builtins(exclude=[None, set, tuple, complex, bytes]),
+                min_size=1,
+            )
             if not fields_strategy
             else fields_strategy
         ),

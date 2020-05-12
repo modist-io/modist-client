@@ -5,7 +5,7 @@
 """Contains the base functionality all configs should have."""
 
 import rapidjson as json
-import toml
+import tomlkit as toml
 from pydantic import BaseModel, NameEmail
 
 from ._types import SemanticSpec, SemanticVersion

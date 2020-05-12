@@ -109,6 +109,38 @@ def require_config_payload(
 
 
 @composite
+def minimal_mod_config_payload(
+    draw,
+    name_strategy: Optional[SearchStrategy[str]] = None,
+    description_strategy: Optional[SearchStrategy[str]] = None,
+    host_strategy: Optional[SearchStrategy[str]] = None,
+    version_strategy: Optional[SearchStrategy[str]] = None,
+    author_strategy: Optional[SearchStrategy[str]] = None,
+) -> dict:
+    """Composite strategy for building the minimal mod config payload."""
+
+    return {
+        "name": draw(
+            from_regex(MOD_CONFIG_NAME_PATTERN) if not name_strategy else name_strategy
+        ),
+        "description": draw(
+            text(
+                min_size=MOD_CONFIG_DESCRIPTION_MIN_LENGTH,
+                max_size=MOD_CONFIG_DESCRIPTION_MAX_LENGTH,
+                alphabet=characters(blacklist_categories=["Cc", "Zl"]),
+            )
+            if not description_strategy
+            else description_strategy
+        ),
+        "host": draw(
+            from_regex(MOD_CONFIG_HOST_PATTERN) if not host_strategy else host_strategy
+        ),
+        "version": draw(semver_version() if not version_strategy else version_strategy),
+        "author": draw(name_email() if not author_strategy else author_strategy),
+    }
+
+
+@composite
 def mod_config_payload(
     draw,
     name_strategy: Optional[SearchStrategy[str]] = None,
