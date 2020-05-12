@@ -2,8 +2,7 @@
 # Copyright (c) 2020 Modist Team <admin@modist.io>
 # ISC License <https://opensource.org/licenses/isc>
 
-"""
-"""
+"""Contains unit-tests for the custom config field types."""
 
 import re
 from typing import Any, Type

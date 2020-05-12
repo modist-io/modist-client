@@ -5,7 +5,6 @@
 """Contains the base functionality all configs should have."""
 
 import rapidjson as json
-import tomlkit as toml
 from pydantic import BaseModel, NameEmail
 
 from ._types import SemanticSpec, SemanticVersion
@@ -40,16 +39,6 @@ class BaseConfig(BaseModel):
 
         return cls(**json.loads(json_content))
 
-    @classmethod
-    def from_toml(cls, toml_content: str) -> "BaseConfig":
-        """Load a new instance of the config from a TOML string.
-
-        :return: The TOML string to load teh config instance from
-        :rtype: BaseConfig
-        """
-
-        return cls(**toml.loads(toml_content))
-
     def to_json(self, *args, **kwargs) -> str:
         """Dump the config instance to a JSON string.
 
@@ -58,16 +47,3 @@ class BaseConfig(BaseModel):
         """
 
         return self.json(*args, **kwargs)
-
-    def to_toml(self) -> str:
-        """Dump the config instance to a TOML string.
-
-        :return: The TOML representation of the config instance
-        :rtype: str
-        """
-
-        # NOTE: This is horrible, but we require the Pydantic model json encoders to run
-        # against the instance dict and we don't want to override their internals to do
-        # it ourselves. So the easiest way to get the JSON-serializable dictionary is to
-        # serialize the instance to JSON and deserialize it for TOML to dump
-        return toml.dumps(json.loads(self.to_json()))
