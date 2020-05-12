@@ -4,6 +4,7 @@
 
 """Contains strategies that are useful throughout all the module tests."""
 
+from enum import Enum
 from typing import Any, Dict, List, Optional, Type
 
 from hypothesis import assume
@@ -29,6 +30,21 @@ from hypothesis.strategies import (
     text,
 )
 from pydantic import BaseModel, create_model
+
+
+class SemanticSpecOperator(Enum):
+    """Enumeration of available ``SemanticSpec`` operators."""
+
+    EQ = "=="
+    NE = "!="
+    LE = "<="
+    GE = ">="
+    LT = "<"
+    GT = ">"
+    EQUIV = "~="
+    MAJOR = "^"
+    MINOR = "~"
+    NONE = ""
 
 
 @composite
@@ -187,7 +203,7 @@ def semver_spec_operator(
     """Composite strategy for building a semver spec operator symbol."""
 
     return draw(
-        sampled_from(["==", "!=", "<=", ">=", "<", ">", "~=", "^=", "^", "~", ""])
+        sampled_from([_.value for _ in SemanticSpecOperator])
         if not operator_strategy
         else operator_strategy
     )
