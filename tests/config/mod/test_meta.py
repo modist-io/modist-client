@@ -2,8 +2,7 @@
 # Copyright (c) 2020 Modist Team <admin@modist.io>
 # ISC License <https://opensource.org/licenses/isc>
 
-"""
-"""
+"""Contains unit-tests for the mod meta config."""
 
 import pytest
 from hypothesis import given
@@ -22,12 +21,16 @@ from .strategies import meta_config_payload, spec_config_payload
 
 @given(meta_config_payload())
 def test_meta_valid(payload: dict):
+    """Ensure MetaConfig is valid."""
+
     config = MetaConfig(**payload)
     assert isinstance(config, MetaConfig)
 
 
 @given(spec_config_payload())
 def test_spec_valid(payload: dict):
+    """Ensure SpecConfig is valid."""
+
     config = SpecConfig(**payload)
     assert isinstance(config, SpecConfig)
 
@@ -39,6 +42,8 @@ def test_spec_valid(payload: dict):
     )
 )
 def test_spec_invalid_version_min(payload: dict):
+    """Ensure SpecConfig raises ValidationError with too small version."""
+
     with pytest.raises(ValidationError):
         SpecConfig(**payload)
 
@@ -50,5 +55,7 @@ def test_spec_invalid_version_min(payload: dict):
     )
 )
 def test_spec_invalid_version_max(payload: dict):
+    """Ensure SpecConfig raises ValidationError with too large version."""
+
     with pytest.raises(ValidationError):
         SpecConfig(**payload)

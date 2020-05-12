@@ -23,12 +23,16 @@ from ..strategies import builtins, pydantic_model, semver_spec, semver_version
     semver_version(),
 )
 def test_SemanticVersion_valid(model: Type[BaseModel], semver_version: str):
+    """Ensure SemanticVersion field is valid."""
+
     instance = model(version=semver_version)
     assert isinstance(instance.version, Version)  # type: ignore
 
 
 @given(pydantic_model(fields_strategy=just({"version": (SemanticVersion, ...)})))
 def test_SemanticVersion_generates_valid_schema(model: Type[BaseModel]):
+    """Ensure SemanticVersion generates a valid JSONSchema entry."""
+
     schema = model.schema()
     assert "properties" in schema
     assert "version" in schema["properties"]
@@ -48,18 +52,24 @@ def test_SemanticVersion_generates_valid_schema(model: Type[BaseModel]):
     builtins(exclude=[str]),
 )
 def test_SemanticVersion_only_accepts_strings(model: Type[BaseModel], value: Any):
+    """Ensure SemanticVersion raises ValidationError with non-string."""
+
     with pytest.raises(ValidationError):
         model(version=value)
 
 
 @given(builtins(exclude=[str]))
 def test_SemanticVersion_validate_requires_strings(value: Any):
+    """Ensure SemanticVersion validator raises TypeError with non-string."""
+
     with pytest.raises(TypeError):
         SemanticVersion.validate(value)
 
 
 @given(text())
 def test_SemanticVersion_validate_requires_valid_semver_string(value: str):
+    """Ensure SemanticVresion validator raises ValueError with non-semver string."""
+
     assume(not validate(value))
     with pytest.raises(ValueError):
         SemanticVersion.validate(value)
@@ -69,12 +79,16 @@ def test_SemanticVersion_validate_requires_valid_semver_string(value: str):
     pydantic_model(fields_strategy=just({"spec": (SemanticSpec, ...)})), semver_spec()
 )
 def test_SemanticSpec_valid(model: Type[BaseModel], semver_spec: str):
+    """Ensure SemanticSpec is valid."""
+
     instance = model(spec=semver_spec)
     assert isinstance(instance.spec, SimpleSpec)  # type: ignore
 
 
 @given(pydantic_model(fields_strategy=just({"spec": (SemanticSpec, ...)})))
 def test_SemanticSpec_generates_valid_schema(model: Type[BaseModel]):
+    """Ensure SemanticSpec generates a valid JSONSchema entry."""
+
     schema = model.schema()
     assert "properties" in schema
     assert "spec" in schema["properties"]
@@ -91,11 +105,15 @@ def test_SemanticSpec_generates_valid_schema(model: Type[BaseModel]):
     builtins(exclude=[str]),
 )
 def test_SemanticSpec_only_accepts_strings(model: Type[BaseModel], value: Any):
+    """Ensure SemanticSpec raises ValidationError with non-string."""
+
     with pytest.raises(ValidationError):
         model(spec=value)
 
 
 @given(builtins(exclude=[str]))
 def test_SemanticSpec_validate(value: Any):
+    """Ensure SemanticSpec validator raises TypeError with non-string."""
+
     with pytest.raises(TypeError):
         SemanticSpec.validate(value)

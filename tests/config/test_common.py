@@ -16,6 +16,8 @@ from ..strategies import pydantic_model
 
 @given(pydantic_model(base_class=BaseConfig))
 def test_BaseConfig_to_json(config: Type[BaseConfig]):
+    """Ensure BaseConfig can serialize itself out to valid JSON."""
+
     instance = config()
     assert hasattr(instance, "to_json")
     content = instance.to_json()
@@ -25,6 +27,8 @@ def test_BaseConfig_to_json(config: Type[BaseConfig]):
 
 @given(pydantic_model(base_class=BaseConfig))
 def test_BaseConfig_from_json(config: Type[BaseConfig]):
+    """Ensure BaseConfig can load itself from its own dumped JSON string."""
+
     assert hasattr(config, "from_json")
     initial_instance = config()
     content = initial_instance.to_json()
