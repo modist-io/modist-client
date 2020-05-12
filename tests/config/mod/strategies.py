@@ -22,16 +22,16 @@ from hypothesis.strategies import (
     text,
 )
 
-from modist.config.mod.meta import SPEC_CONFIG_VERSION_MAX, SPEC_CONFIG_VERSION_MIN
+from modist.config.mod.meta import SPEC_VERSION_MAX, SPEC_VERSION_MIN
 from modist.config.mod.mod import (
-    MOD_CONFIG_CATEGORIES_MAX_LENGTH,
-    MOD_CONFIG_CATEGORY_PATTERN,
-    MOD_CONFIG_DESCRIPTION_MAX_LENGTH,
-    MOD_CONFIG_DESCRIPTION_MIN_LENGTH,
-    MOD_CONFIG_HOST_PATTERN,
-    MOD_CONFIG_KEYWORD_PATTERN,
-    MOD_CONFIG_KEYWORDS_MAX_LENGTH,
-    MOD_CONFIG_NAME_PATTERN,
+    MOD_CATEGORIES_MAX_LENGTH,
+    MOD_CATEGORY_PATTERN,
+    MOD_DESCRIPTION_MAX_LENGTH,
+    MOD_DESCRIPTION_MIN_LENGTH,
+    MOD_HOST_PATTERN,
+    MOD_KEYWORD_PATTERN,
+    MOD_KEYWORDS_MAX_LENGTH,
+    MOD_NAME_PATTERN,
 )
 from modist.config.mod.require import OperatingSystem, ProcessorArchitecture
 
@@ -46,9 +46,7 @@ def spec_config_payload(
 
     return {
         "version": draw(
-            integers(
-                min_value=SPEC_CONFIG_VERSION_MIN, max_value=SPEC_CONFIG_VERSION_MAX
-            )
+            integers(min_value=SPEC_VERSION_MIN, max_value=SPEC_VERSION_MAX)
         )
         if not version_strategy
         else draw(version_strategy)
@@ -121,19 +119,19 @@ def minimal_mod_config_payload(
 
     return {
         "name": draw(
-            from_regex(MOD_CONFIG_NAME_PATTERN) if not name_strategy else name_strategy
+            from_regex(MOD_NAME_PATTERN) if not name_strategy else name_strategy
         ),
         "description": draw(
             text(
-                min_size=MOD_CONFIG_DESCRIPTION_MIN_LENGTH,
-                max_size=MOD_CONFIG_DESCRIPTION_MAX_LENGTH,
+                min_size=MOD_DESCRIPTION_MIN_LENGTH,
+                max_size=MOD_DESCRIPTION_MAX_LENGTH,
                 alphabet=characters(blacklist_categories=["Cc", "Zl"]),
             )
             if not description_strategy
             else description_strategy
         ),
         "host": draw(
-            from_regex(MOD_CONFIG_HOST_PATTERN) if not host_strategy else host_strategy
+            from_regex(MOD_HOST_PATTERN) if not host_strategy else host_strategy
         ),
         "version": draw(semver_version() if not version_strategy else version_strategy),
         "author": draw(name_email() if not author_strategy else author_strategy),
@@ -164,20 +162,20 @@ def mod_config_payload(
 
     return {
         "name": (
-            draw(from_regex(MOD_CONFIG_NAME_PATTERN))
+            draw(from_regex(MOD_NAME_PATTERN))
             if not name_strategy
             else draw(name_strategy)
         ),
         "host": (
-            draw(from_regex(MOD_CONFIG_HOST_PATTERN))
+            draw(from_regex(MOD_HOST_PATTERN))
             if not host_strategy
             else draw(host_strategy)
         ),
         "description": (
             draw(
                 text(
-                    min_size=MOD_CONFIG_DESCRIPTION_MIN_LENGTH,
-                    max_size=MOD_CONFIG_DESCRIPTION_MAX_LENGTH,
+                    min_size=MOD_DESCRIPTION_MIN_LENGTH,
+                    max_size=MOD_DESCRIPTION_MAX_LENGTH,
                     alphabet=characters(blacklist_categories=["Cc", "Zl"]),
                 )
                 if not description_strategy
@@ -191,8 +189,8 @@ def mod_config_payload(
         ),
         "keywords": draw(
             lists(
-                from_regex(MOD_CONFIG_KEYWORD_PATTERN, fullmatch=True),
-                max_size=MOD_CONFIG_KEYWORDS_MAX_LENGTH,
+                from_regex(MOD_KEYWORD_PATTERN, fullmatch=True),
+                max_size=MOD_KEYWORDS_MAX_LENGTH,
                 unique=True,
             )
             if not keywords_strategy
@@ -200,8 +198,8 @@ def mod_config_payload(
         ),
         "categories": draw(
             lists(
-                from_regex(MOD_CONFIG_CATEGORY_PATTERN, fullmatch=True),
-                max_size=MOD_CONFIG_CATEGORIES_MAX_LENGTH,
+                from_regex(MOD_CATEGORY_PATTERN, fullmatch=True),
+                max_size=MOD_CATEGORIES_MAX_LENGTH,
                 unique=True,
             )
             if not categories_strategy
@@ -233,20 +231,18 @@ def mod_config_payload(
             require_config_payload() if not require_strategy else require_strategy
         ),
         "depends": draw(
-            dictionaries(from_regex(MOD_CONFIG_NAME_PATTERN), semver_spec(), min_size=1)
+            dictionaries(from_regex(MOD_NAME_PATTERN), semver_spec(), min_size=1)
             if not depends_strategy
             else depends_strategy
         ),
         "conflicts": draw(
-            dictionaries(from_regex(MOD_CONFIG_NAME_PATTERN), semver_spec(), min_size=1)
+            dictionaries(from_regex(MOD_NAME_PATTERN), semver_spec(), min_size=1)
             if not depends_strategy
             else depends_strategy
         ),
         "peers": draw(
             one_of(
-                dictionaries(
-                    from_regex(MOD_CONFIG_NAME_PATTERN), semver_spec(), min_size=1
-                ),
+                dictionaries(from_regex(MOD_NAME_PATTERN), semver_spec(), min_size=1),
                 dictionaries(nothing(), nothing(), max_size=0),
             )
             if not depends_strategy

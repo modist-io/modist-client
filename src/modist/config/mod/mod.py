@@ -13,23 +13,23 @@ from .._types import SemanticSpec, SemanticVersion
 from .meta import MetaConfig
 from .require import RequireConfig
 
-MOD_CONFIG_NAME_MIN_LENGTH = 3
-MOD_CONFIG_NAME_MAX_LENGTH = 64
-MOD_CONFIG_NAME_PATTERN = r"\A(?P<name>[a-zA-Z][\w\-]{2,62}[a-zA-Z0-9])\Z"
-MOD_CONFIG_HOST_PATTERN = (
+MOD_NAME_MIN_LENGTH = 3
+MOD_NAME_MAX_LENGTH = 64
+MOD_NAME_PATTERN = r"\A(?P<name>[a-zA-Z][\w\-]{2,62}[a-zA-Z0-9])\Z"
+MOD_HOST_PATTERN = (
     r"\A(?P<publisher>[a-z][a-z0-9\-]{1,62}[a-z0-9])"
     r"\."
     r"(?P<host>[a-z][a-z0-9\-]{1,62}[a-z0-9])\Z"
 )
-MOD_CONFIG_DESCRIPTION_MIN_LENGTH = 3
-MOD_CONFIG_DESCRIPTION_MAX_LENGTH = 240
-MOD_CONFIG_DEFAULT_VERSION = "0.0.1"
-MOD_CONFIG_KEYWORDS_MAX_LENGTH = 5
-MOD_CONFIG_KEYWORD_MIN_LENGTH = 3
-MOD_CONFIG_KEYWORD_PATTERN = r"\A[^\s]{3,}\Z"
-MOD_CONFIG_CATEGORIES_MAX_LENGTH = 5
-MOD_CONFIG_CATEGORY_MIN_LENGTH = 3
-MOD_CONFIG_CATEGORY_PATTERN = r"\A[^\s]{3,}\Z"
+MOD_DESCRIPTION_MIN_LENGTH = 3
+MOD_DESCRIPTION_MAX_LENGTH = 240
+MOD_DEFAULT_VERSION = "0.0.1"
+MOD_KEYWORDS_MAX_LENGTH = 5
+MOD_KEYWORD_MIN_LENGTH = 3
+MOD_KEYWORD_PATTERN = r"\A[^\s]{3,}\Z"
+MOD_CATEGORIES_MAX_LENGTH = 5
+MOD_CATEGORY_MIN_LENGTH = 3
+MOD_CATEGORY_PATTERN = r"\A[^\s]{3,}\Z"
 
 
 class ModConfig(BaseConfig):
@@ -39,22 +39,22 @@ class ModConfig(BaseConfig):
         ...,
         title="Mod Name",
         description="Describes the user-given slug identifying name of the mod",
-        min_length=MOD_CONFIG_NAME_MIN_LENGTH,
-        max_length=MOD_CONFIG_NAME_MAX_LENGTH,
-        regex=MOD_CONFIG_NAME_PATTERN,
+        min_length=MOD_NAME_MIN_LENGTH,
+        max_length=MOD_NAME_MAX_LENGTH,
+        regex=MOD_NAME_PATTERN,
     )
     host: str = Field(
         ...,
         title="Mod Host",
         description="Describes the host that the mod is built for",
-        regex=MOD_CONFIG_HOST_PATTERN,
+        regex=MOD_HOST_PATTERN,
     )
     description: str = Field(
         ...,
         title="Mod Description",
         description="Describes in a short one-liner the purpose of the mod",
-        min_length=MOD_CONFIG_DESCRIPTION_MIN_LENGTH,
-        max_length=MOD_CONFIG_DESCRIPTION_MAX_LENGTH,
+        min_length=MOD_DESCRIPTION_MIN_LENGTH,
+        max_length=MOD_DESCRIPTION_MAX_LENGTH,
     )
     version: SemanticVersion = Field(
         ...,
@@ -74,17 +74,17 @@ class ModConfig(BaseConfig):
         default=[],
         title="Mod Keywords",
         description="Tags the mod with specific keywords",
-        max_items=MOD_CONFIG_KEYWORDS_MAX_LENGTH,
-        min_length=MOD_CONFIG_KEYWORD_MIN_LENGTH,
-        regex=MOD_CONFIG_KEYWORD_PATTERN,
+        max_items=MOD_KEYWORDS_MAX_LENGTH,
+        min_length=MOD_KEYWORD_MIN_LENGTH,
+        regex=MOD_KEYWORD_PATTERN,
     )
     categories: List[str] = Field(
         default=[],
         title="Mod Categories",
         description="Categorizes the mod with defined categories",
-        max_items=MOD_CONFIG_CATEGORIES_MAX_LENGTH,
-        min_length=MOD_CONFIG_CATEGORY_MIN_LENGTH,
-        regex=MOD_CONFIG_CATEGORY_PATTERN,
+        max_items=MOD_CATEGORIES_MAX_LENGTH,
+        min_length=MOD_CATEGORY_MIN_LENGTH,
+        regex=MOD_CATEGORY_PATTERN,
     )
     include: List[str] = Field(
         default=[],

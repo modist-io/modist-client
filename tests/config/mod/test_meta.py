@@ -10,8 +10,8 @@ from hypothesis.strategies import integers
 from pydantic import ValidationError
 
 from modist.config.mod.meta import (
-    SPEC_CONFIG_VERSION_MAX,
-    SPEC_CONFIG_VERSION_MIN,
+    SPEC_VERSION_MAX,
+    SPEC_VERSION_MIN,
     MetaConfig,
     SpecConfig,
 )
@@ -36,11 +36,7 @@ def test_spec_valid(payload: dict):
 
 
 @pytest.mark.extra
-@given(
-    spec_config_payload(
-        version_strategy=integers(max_value=SPEC_CONFIG_VERSION_MIN - 1)
-    )
-)
+@given(spec_config_payload(version_strategy=integers(max_value=SPEC_VERSION_MIN - 1)))
 def test_spec_invalid_version_min(payload: dict):
     """Ensure SpecConfig raises ValidationError with too small version."""
 
@@ -49,11 +45,7 @@ def test_spec_invalid_version_min(payload: dict):
 
 
 @pytest.mark.extra
-@given(
-    spec_config_payload(
-        version_strategy=integers(min_value=SPEC_CONFIG_VERSION_MAX + 1)
-    )
-)
+@given(spec_config_payload(version_strategy=integers(min_value=SPEC_VERSION_MAX + 1)))
 def test_spec_invalid_version_max(payload: dict):
     """Ensure SpecConfig raises ValidationError with too large version."""
 

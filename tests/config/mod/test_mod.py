@@ -18,18 +18,18 @@ from pydantic.errors import EmailError
 from pydantic.networks import validate_email
 
 from modist.config.mod.mod import (
-    MOD_CONFIG_CATEGORIES_MAX_LENGTH,
-    MOD_CONFIG_CATEGORY_MIN_LENGTH,
-    MOD_CONFIG_CATEGORY_PATTERN,
-    MOD_CONFIG_DESCRIPTION_MAX_LENGTH,
-    MOD_CONFIG_DESCRIPTION_MIN_LENGTH,
-    MOD_CONFIG_HOST_PATTERN,
-    MOD_CONFIG_KEYWORD_MIN_LENGTH,
-    MOD_CONFIG_KEYWORD_PATTERN,
-    MOD_CONFIG_KEYWORDS_MAX_LENGTH,
-    MOD_CONFIG_NAME_MAX_LENGTH,
-    MOD_CONFIG_NAME_MIN_LENGTH,
-    MOD_CONFIG_NAME_PATTERN,
+    MOD_CATEGORIES_MAX_LENGTH,
+    MOD_CATEGORY_MIN_LENGTH,
+    MOD_CATEGORY_PATTERN,
+    MOD_DESCRIPTION_MAX_LENGTH,
+    MOD_DESCRIPTION_MIN_LENGTH,
+    MOD_HOST_PATTERN,
+    MOD_KEYWORD_MIN_LENGTH,
+    MOD_KEYWORD_PATTERN,
+    MOD_KEYWORDS_MAX_LENGTH,
+    MOD_NAME_MAX_LENGTH,
+    MOD_NAME_MIN_LENGTH,
+    MOD_NAME_PATTERN,
     ModConfig,
 )
 
@@ -45,23 +45,17 @@ def test_config_valid(payload: dict):
 
 
 @pytest.mark.extra
-@given(
-    minimal_mod_config_payload(name_strategy=text(max_size=MOD_CONFIG_NAME_MAX_LENGTH))
-)
+@given(minimal_mod_config_payload(name_strategy=text(max_size=MOD_NAME_MAX_LENGTH)))
 def test_config_invalid_name(payload: dict):
     """Ensure ModConfig raises ValidationError on invalid name."""
 
-    assume(not re.match(MOD_CONFIG_NAME_PATTERN, payload["name"]))
+    assume(not re.match(MOD_NAME_PATTERN, payload["name"]))
     with pytest.raises(ValidationError):
         ModConfig(**payload)
 
 
 @pytest.mark.extra
-@given(
-    minimal_mod_config_payload(
-        name_strategy=text(max_size=MOD_CONFIG_NAME_MIN_LENGTH - 1)
-    )
-)
+@given(minimal_mod_config_payload(name_strategy=text(max_size=MOD_NAME_MIN_LENGTH - 1)))
 def test_config_invalid_name_min_length(payload: dict):
     """Ensure ModConfig raises ValidationError on too short name."""
 
@@ -75,8 +69,7 @@ def test_config_invalid_name_min_length(payload: dict):
 @given(
     minimal_mod_config_payload(
         name_strategy=text(
-            min_size=MOD_CONFIG_NAME_MAX_LENGTH + 1,
-            max_size=MOD_CONFIG_NAME_MAX_LENGTH + 1,
+            min_size=MOD_NAME_MAX_LENGTH + 1, max_size=MOD_NAME_MAX_LENGTH + 1,
         )
     )
 )
@@ -92,7 +85,7 @@ def test_config_invalid_name_max_length(payload: dict):
 def test_config_invalid_host(payload: dict):
     """Ensure ModConfig raises ValidationError on invalid host."""
 
-    assume(not re.match(MOD_CONFIG_HOST_PATTERN, payload["host"]))
+    assume(not re.match(MOD_HOST_PATTERN, payload["host"]))
     with pytest.raises(ValidationError):
         ModConfig(**payload)
 
@@ -101,8 +94,7 @@ def test_config_invalid_host(payload: dict):
     randoms(),
     minimal_mod_config_payload(
         description_strategy=text(
-            max_size=MOD_CONFIG_DESCRIPTION_MAX_LENGTH,
-            min_size=MOD_CONFIG_DESCRIPTION_MIN_LENGTH,
+            max_size=MOD_DESCRIPTION_MAX_LENGTH, min_size=MOD_DESCRIPTION_MIN_LENGTH,
         )
     ),
 )
@@ -118,10 +110,7 @@ def test_config_invalid_description_with_newline(random: Random, payload: dict):
 
 @given(
     randoms(),
-    text(
-        max_size=MOD_CONFIG_DESCRIPTION_MAX_LENGTH,
-        min_size=MOD_CONFIG_DESCRIPTION_MIN_LENGTH,
-    ),
+    text(max_size=MOD_DESCRIPTION_MAX_LENGTH, min_size=MOD_DESCRIPTION_MIN_LENGTH,),
 )
 def test_config_validate_description_raises_ValueError_with_newline(
     random: Random, description: str
@@ -140,7 +129,7 @@ def test_config_validate_description_raises_ValueError_with_newline(
 @given(
     minimal_mod_config_payload(
         description_strategy=text(
-            max_size=MOD_CONFIG_DESCRIPTION_MIN_LENGTH - 1,
+            max_size=MOD_DESCRIPTION_MIN_LENGTH - 1,
             alphabet=characters(blacklist_categories=["Cc", "Zl"]),
         )
     )
@@ -158,8 +147,8 @@ def test_config_invalid_description_min_length(payload: dict):
 @given(
     minimal_mod_config_payload(
         description_strategy=text(
-            min_size=MOD_CONFIG_DESCRIPTION_MAX_LENGTH + 1,
-            max_size=MOD_CONFIG_DESCRIPTION_MAX_LENGTH + 1,
+            min_size=MOD_DESCRIPTION_MAX_LENGTH + 1,
+            max_size=MOD_DESCRIPTION_MAX_LENGTH + 1,
             alphabet=characters(blacklist_categories=["Cc", "Zl"]),
         )
     )
@@ -219,8 +208,8 @@ def test_config_invalid_contributors(payload: dict, contributors: List[str]):
 @given(
     minimal_mod_config_payload(),
     lists(
-        text(alphabet=string.ascii_letters, min_size=MOD_CONFIG_KEYWORD_MIN_LENGTH),
-        min_size=MOD_CONFIG_KEYWORDS_MAX_LENGTH + 1,
+        text(alphabet=string.ascii_letters, min_size=MOD_KEYWORD_MIN_LENGTH),
+        min_size=MOD_KEYWORDS_MAX_LENGTH + 1,
         unique=True,
     ),
 )
@@ -238,7 +227,7 @@ def test_config_invalid_keywords_max_size(payload: dict, keywords: List[str]):
     lists(
         text(alphabet=characters(whitelist_categories=["Z"])),
         min_size=1,
-        max_size=MOD_CONFIG_KEYWORDS_MAX_LENGTH,
+        max_size=MOD_KEYWORDS_MAX_LENGTH,
         unique=True,
     ),
 )
@@ -253,9 +242,9 @@ def test_config_invalid_keywords(payload: dict, keywords: List[str]):
 @given(
     minimal_mod_config_payload(),
     lists(
-        from_regex(MOD_CONFIG_KEYWORD_PATTERN, fullmatch=True),
+        from_regex(MOD_KEYWORD_PATTERN, fullmatch=True),
         min_size=1,
-        max_size=MOD_CONFIG_KEYWORDS_MAX_LENGTH - 1,
+        max_size=MOD_KEYWORDS_MAX_LENGTH - 1,
         unique=False,
     ),
 )
@@ -270,9 +259,9 @@ def test_config_invalid_keywords_duplicates(payload: dict, keywords: List[str]):
 
 @given(
     lists(
-        from_regex(MOD_CONFIG_KEYWORD_PATTERN, fullmatch=True),
+        from_regex(MOD_KEYWORD_PATTERN, fullmatch=True),
         min_size=1,
-        max_size=MOD_CONFIG_KEYWORDS_MAX_LENGTH - 1,
+        max_size=MOD_KEYWORDS_MAX_LENGTH - 1,
         unique=False,
     )
 )
@@ -288,9 +277,9 @@ def test_config_validate_keywords_raises_ValueError_on_duplicates(keywords: List
 
 @given(
     lists(
-        from_regex(MOD_CONFIG_KEYWORD_PATTERN, fullmatch=True),
+        from_regex(MOD_KEYWORD_PATTERN, fullmatch=True),
         min_size=1,
-        max_size=MOD_CONFIG_KEYWORDS_MAX_LENGTH,
+        max_size=MOD_KEYWORDS_MAX_LENGTH,
         unique=True,
     )
 )
@@ -304,8 +293,8 @@ def test_config_validate_keywords_returns_keywords(keywords: List[str]):
 @given(
     minimal_mod_config_payload(),
     lists(
-        text(alphabet=string.ascii_letters, min_size=MOD_CONFIG_CATEGORY_MIN_LENGTH),
-        min_size=MOD_CONFIG_CATEGORIES_MAX_LENGTH + 1,
+        text(alphabet=string.ascii_letters, min_size=MOD_CATEGORY_MIN_LENGTH),
+        min_size=MOD_CATEGORIES_MAX_LENGTH + 1,
         unique=True,
     ),
 )
@@ -323,7 +312,7 @@ def test_config_invalid_categories_max_size(payload: dict, categories: List[str]
     lists(
         text(alphabet=characters(whitelist_categories=["Z"])),
         min_size=1,
-        max_size=MOD_CONFIG_CATEGORIES_MAX_LENGTH,
+        max_size=MOD_CATEGORIES_MAX_LENGTH,
         unique=True,
     ),
 )
@@ -338,9 +327,9 @@ def test_config_invalid_categories(payload: dict, categories: List[str]):
 @given(
     minimal_mod_config_payload(),
     lists(
-        from_regex(MOD_CONFIG_CATEGORY_PATTERN, fullmatch=True),
+        from_regex(MOD_CATEGORY_PATTERN, fullmatch=True),
         min_size=1,
-        max_size=MOD_CONFIG_CATEGORIES_MAX_LENGTH - 1,
+        max_size=MOD_CATEGORIES_MAX_LENGTH - 1,
         unique=False,
     ),
 )
@@ -355,9 +344,9 @@ def test_config_invalid_categories_duplicates(payload: dict, categories: List[st
 
 @given(
     lists(
-        from_regex(MOD_CONFIG_CATEGORY_PATTERN, fullmatch=True),
+        from_regex(MOD_CATEGORY_PATTERN, fullmatch=True),
         min_size=1,
-        max_size=MOD_CONFIG_CATEGORIES_MAX_LENGTH - 1,
+        max_size=MOD_CATEGORIES_MAX_LENGTH - 1,
         unique=False,
     )
 )
@@ -375,9 +364,9 @@ def test_config_validate_categories_raises_ValueError_on_duplicates(
 
 @given(
     lists(
-        from_regex(MOD_CONFIG_CATEGORY_PATTERN, fullmatch=True),
+        from_regex(MOD_CATEGORY_PATTERN, fullmatch=True),
         min_size=1,
-        max_size=MOD_CONFIG_CATEGORIES_MAX_LENGTH,
+        max_size=MOD_CATEGORIES_MAX_LENGTH,
         unique=True,
     )
 )

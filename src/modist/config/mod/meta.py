@@ -8,20 +8,20 @@ from pydantic import Field
 
 from .._common import BaseConfig
 
-SPEC_CONFIG_DEFAULT_VERSION = 1
-SPEC_CONFIG_VERSION_MIN = 1
-SPEC_CONFIG_VERSION_MAX = SPEC_CONFIG_DEFAULT_VERSION
+SPEC_DEFAULT_VERSION = 1
+SPEC_VERSION_MIN = 1
+SPEC_VERSION_MAX = SPEC_DEFAULT_VERSION
 
 
 class SpecConfig(BaseConfig):
     """Defines the structure of the meta spec config."""
 
     version: int = Field(
-        default=SPEC_CONFIG_DEFAULT_VERSION,
+        default=SPEC_DEFAULT_VERSION,
         title="Spec Version",
         description="Describes the mod configuration spec version",
-        ge=SPEC_CONFIG_VERSION_MIN,
-        le=SPEC_CONFIG_VERSION_MAX,
+        ge=SPEC_VERSION_MIN,
+        le=SPEC_VERSION_MAX,
     )
 
 
