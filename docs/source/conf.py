@@ -13,9 +13,9 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
-import sys
-import pathlib
 import configparser
+import pathlib
+import sys
 
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent.parent
 
@@ -89,21 +89,30 @@ pygments_style = None
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "alabaster"
+html_theme = "sphinx_material"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
 html_theme_options = {
-    "description": metadata["description"],
-    "github_user": "modist-io",
-    "github_repo": "modist-client",
-    "github_type": "star",
-    "page_width": "1000px",
-    "sidebar_width": "220px",
-    "sidebar_collapse": True,
-    "fixed_sidebar": True,
+    "nav_title": title,
+    "base_url": metadata["url"],
+    "color_primary": "blue-grey",
+    "color_accent": "light-blue",
+    "repo_url": metadata["url"],
+    "repo_name": title,
+    "globaltoc_depth": 3,
+    "globaltoc_collapse": False,
+    "globaltoc_includehidden": False
+    # "description": metadata["description"],
+    # "github_user": "modist-io",
+    # "github_repo": "modist-client",
+    # "github_type": "star",
+    # "page_width": "1000px",
+    # "sidebar_width": "220px",
+    # "sidebar_collapse": True,
+    # "fixed_sidebar": True,
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
