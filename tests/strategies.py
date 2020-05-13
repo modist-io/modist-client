@@ -7,17 +7,14 @@
 from enum import Enum
 from typing import Any, Dict, List, Optional, Type
 
-from hypothesis import assume
 from hypothesis.strategies import (
     SearchStrategy,
     binary,
     booleans,
     builds,
-    characters,
     complex_numbers,
     composite,
     dictionaries,
-    emails,
     floats,
     from_regex,
     integers,
@@ -133,33 +130,6 @@ def pydantic_model(
             else fields_strategy
         ),
     )
-
-
-@composite
-def name_email(
-    draw,
-    name_strategy: Optional[SearchStrategy[str]] = None,
-    email_strategy: Optional[SearchStrategy[str]] = None,
-    include_name: Optional[bool] = None,
-) -> str:
-    """Composite strategy for building a named email string."""
-
-    email = draw(emails() if not email_strategy else email_strategy)
-    # HACK: hypothesis will sometimes generate emails with `--` in the domain
-    # (which isn't technically wrong) but violates many validators
-    assume("--" not in email)
-
-    if include_name or draw(booleans()):
-        return (
-            draw(
-                text(alphabet=characters(whitelist_categories=["L"]))
-                if not name_strategy
-                else name_strategy
-            )
-            + f" <{email!s}>"
-        )
-
-    return email
 
 
 @composite

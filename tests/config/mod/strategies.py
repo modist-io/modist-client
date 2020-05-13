@@ -24,8 +24,10 @@ from hypothesis.strategies import (
 
 from modist.config.mod.meta import SPEC_VERSION_MAX, SPEC_VERSION_MIN
 from modist.config.mod.mod import (
+    MOD_AUTHOR_MAX_LENGTH,
     MOD_CATEGORIES_MAX_LENGTH,
     MOD_CATEGORY_PATTERN,
+    MOD_CONTRIBUTOR_MAX_LENGTH,
     MOD_DESCRIPTION_MAX_LENGTH,
     MOD_DESCRIPTION_MIN_LENGTH,
     MOD_HOST_PATTERN,
@@ -35,7 +37,7 @@ from modist.config.mod.mod import (
 )
 from modist.config.mod.require import OperatingSystem, ProcessorArchitecture
 
-from ...strategies import name_email, semver_spec, semver_version
+from ...strategies import semver_spec, semver_version
 
 
 @composite
@@ -134,7 +136,14 @@ def minimal_mod_config_payload(
             from_regex(MOD_HOST_PATTERN) if not host_strategy else host_strategy
         ),
         "version": draw(semver_version() if not version_strategy else version_strategy),
-        "author": draw(name_email() if not author_strategy else author_strategy),
+        "author": draw(
+            text(
+                max_size=MOD_AUTHOR_MAX_LENGTH,
+                alphabet=characters(blacklist_categories=["Cc", "Zl"]),
+            )
+            if not author_strategy
+            else author_strategy
+        ),
     }
 
 
@@ -183,9 +192,23 @@ def mod_config_payload(
             )
         ),
         "version": draw(semver_version() if not version_strategy else version_strategy),
-        "author": draw(name_email() if not author_strategy else author_strategy),
+        "author": draw(
+            text(
+                max_size=MOD_AUTHOR_MAX_LENGTH,
+                alphabet=characters(blacklist_categories=["Cc", "Zl"]),
+            )
+            if not author_strategy
+            else author_strategy
+        ),
         "contributors": draw(
-            lists(name_email()) if not contributors_strategy else contributors_strategy
+            lists(
+                text(
+                    max_size=MOD_CONTRIBUTOR_MAX_LENGTH,
+                    alphabet=characters(blacklist_categories=["Cc", "Zl"]),
+                )
+            )
+            if not contributors_strategy
+            else contributors_strategy
         ),
         "keywords": draw(
             lists(

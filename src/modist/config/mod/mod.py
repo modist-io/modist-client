@@ -4,11 +4,11 @@
 
 """Contains the root mod section of the mod configuration."""
 
-from typing import Dict, List, Optional
+from typing import Dict, Generic, List, Optional
 
-from pydantic import Field, HttpUrl, NameEmail, validator
+from pydantic import Field, HttpUrl, validator
 
-from .._common import BaseConfig
+from .._common import BaseConfig, Config_T
 from .._types import SemanticSpec, SemanticVersion
 from .meta import MetaConfig
 from .require import RequireConfig
@@ -30,9 +30,11 @@ MOD_KEYWORD_PATTERN = r"\A[^\s]{3,}\Z"
 MOD_CATEGORIES_MAX_LENGTH = 5
 MOD_CATEGORY_MIN_LENGTH = 3
 MOD_CATEGORY_PATTERN = r"\A[^\s]{3,}\Z"
+MOD_AUTHOR_MAX_LENGTH = 64
+MOD_CONTRIBUTOR_MAX_LENGTH = 64
 
 
-class ModConfig(BaseConfig):
+class ModConfig(BaseConfig, Generic[Config_T]):
     """Defines the structure of the base mod config."""
 
     name: str = Field(
@@ -56,19 +58,22 @@ class ModConfig(BaseConfig):
         min_length=MOD_DESCRIPTION_MIN_LENGTH,
         max_length=MOD_DESCRIPTION_MAX_LENGTH,
     )
-    version: SemanticVersion = Field(
+    author: str = Field(
         ...,
+        title="Mod Author",
+        description="Describes the author of the mod and a way of contact",
+        max_length=MOD_AUTHOR_MAX_LENGTH,
+    )
+    version: SemanticVersion = Field(
+        default=SemanticVersion(MOD_DEFAULT_VERSION),
         title="Mod Version",
         description="Contains the local mod's version information",
     )
-    author: NameEmail = Field(
-        title="Mod Author",
-        description="Describes the author of the mod and a way of contact",
-    )
-    contributors: List[NameEmail] = Field(
+    contributors: List[str] = Field(
         default=[],
         title="Mod Contributors",
         description="Describes any contributors to the mod and a way of contact",
+        max_length=MOD_CONTRIBUTOR_MAX_LENGTH,
     )
     keywords: List[str] = Field(
         default=[],
