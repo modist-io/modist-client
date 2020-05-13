@@ -15,7 +15,7 @@ from semantic_version import SimpleSpec, Version, validate
 
 from modist.config._types import SemanticSpec, SemanticVersion
 
-from ..strategies import builtins, pydantic_model, semver_spec, semver_version
+from ..strategies import builtin_types, pydantic_model, semver_spec, semver_version
 
 
 @given(
@@ -49,7 +49,7 @@ def test_SemanticVersion_generates_valid_schema(model: Type[BaseModel]):
 
 @given(
     pydantic_model(fields_strategy=just({"version": (SemanticVersion, ...)})),
-    builtins(exclude=[str]),
+    builtin_types(exclude=[str]),
 )
 def test_SemanticVersion_only_accepts_strings(model: Type[BaseModel], value: Any):
     """Ensure SemanticVersion raises ValidationError with non-string."""
@@ -58,7 +58,7 @@ def test_SemanticVersion_only_accepts_strings(model: Type[BaseModel], value: Any
         model(version=value)
 
 
-@given(builtins(exclude=[str]))
+@given(builtin_types(exclude=[str]))
 def test_SemanticVersion_validate_requires_strings(value: Any):
     """Ensure SemanticVersion validator raises TypeError with non-string."""
 
@@ -102,7 +102,7 @@ def test_SemanticSpec_generates_valid_schema(model: Type[BaseModel]):
 
 @given(
     pydantic_model(fields_strategy=just({"spec": (SemanticSpec, ...)})),
-    builtins(exclude=[str]),
+    builtin_types(exclude=[str]),
 )
 def test_SemanticSpec_only_accepts_strings(model: Type[BaseModel], value: Any):
     """Ensure SemanticSpec raises ValidationError with non-string."""
@@ -111,7 +111,7 @@ def test_SemanticSpec_only_accepts_strings(model: Type[BaseModel], value: Any):
         model(spec=value)
 
 
-@given(builtins(exclude=[str]))
+@given(builtin_types(exclude=[str]))
 def test_SemanticSpec_validate(value: Any):
     """Ensure SemanticSpec validator raises TypeError with non-string."""
 

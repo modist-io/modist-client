@@ -4,7 +4,10 @@
 
 """Contains strategies that are useful throughout all the module tests."""
 
+import builtins
 from enum import Enum
+from inspect import isclass
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Type
 
 from hypothesis.strategies import (
@@ -45,10 +48,10 @@ class SemanticSpecOperator(Enum):
 
 
 @composite
-def builtins(
+def builtin_types(
     draw, include: Optional[List[Type]] = None, exclude: Optional[List[Type]] = None
 ) -> Any:
-    """Composite strategy fro building an instance of a builtin type.
+    """Composite strategy for building an instance of a builtin type.
 
     This strategy allows you to check against builtin types for when you need to do
     varaible validation (which should be rare). By default this composite will generate
@@ -59,14 +62,14 @@ def builtins(
     For example using the ``include`` parameter like the following will ONLY generate
     strings and floats for the samples:
 
-    >>> @given(builtins(include=[str, float]))
+    >>> @given(builtin_types(include=[str, float]))
     ... def test_only_strings_and_floats(value: Union[str, float]):
     ...     assert isinstance(value, (str, float))
 
     Similarly, you can specify to NOT generate Nones and complex numbers like the
     following example:
 
-    >>> @given(builtins(exclude=[None, complex]))
+    >>> @given(builtin_types(exclude=[None, complex]))
     ... def test_not_none_or_complex(value: Any):
     ...     assert value and not isinstance(value, complex)
     """
@@ -98,6 +101,33 @@ def builtins(
 
 
 @composite
+def builtin_exceptions(
+    draw,
+    include: Optional[List[Exception]] = None,
+    exclude: Optional[List[Exception]] = None,
+) -> Type[Exception]:
+    """Composite strategy for building a random exception."""
+
+    to_use = set(
+        [
+            item
+            for _, item in vars(builtins).items()
+            if isclass(item)
+            and issubclass(item, BaseException)
+            and item not in (BaseException,)
+        ]
+    )
+
+    if include and len(include) > 0:
+        to_use = set(include)
+
+    if exclude and len(exclude) > 0:
+        to_use = to_use - set(exclude)
+
+    return draw(sampled_from(list(to_use)))
+
+
+@composite
 def pythonic_name(draw, name_strategy: Optional[SearchStrategy[str]] = None) -> str:
     """Composite strategy for building a Python valid variable / class name."""
 
@@ -106,6 +136,13 @@ def pythonic_name(draw, name_strategy: Optional[SearchStrategy[str]] = None) -> 
         if not name_strategy
         else name_strategy
     )
+
+
+@composite
+def pathlib_path(draw) -> Path:
+    """Composite strategy for building a random ``pathlib.Path`` instance."""
+
+    return Path(*draw(lists(pythonic_name(), min_size=1)))
 
 
 @composite
@@ -123,7 +160,7 @@ def pydantic_model(
         **draw(
             dictionaries(
                 pythonic_name(),
-                builtins(exclude=[None, set, tuple, complex, bytes]),
+                builtin_types(exclude=[None, set, tuple, complex, bytes]),
                 min_size=1,
             )
             if not fields_strategy

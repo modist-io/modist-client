@@ -127,7 +127,7 @@ def minimal_mod_config_payload(
             text(
                 min_size=MOD_DESCRIPTION_MIN_LENGTH,
                 max_size=MOD_DESCRIPTION_MAX_LENGTH,
-                alphabet=characters(blacklist_categories=["Cc", "Zl"]),
+                alphabet=characters(blacklist_categories=["Cc", "Cs", "Zl"]),
             )
             if not description_strategy
             else description_strategy
@@ -139,7 +139,7 @@ def minimal_mod_config_payload(
         "author": draw(
             text(
                 max_size=MOD_AUTHOR_MAX_LENGTH,
-                alphabet=characters(blacklist_categories=["Cc", "Zl"]),
+                alphabet=characters(blacklist_categories=["Cc", "Cs", "Zl"]),
             )
             if not author_strategy
             else author_strategy
@@ -185,7 +185,7 @@ def mod_config_payload(
                 text(
                     min_size=MOD_DESCRIPTION_MIN_LENGTH,
                     max_size=MOD_DESCRIPTION_MAX_LENGTH,
-                    alphabet=characters(blacklist_categories=["Cc", "Zl"]),
+                    alphabet=characters(blacklist_categories=["Cc", "Cs", "Zl"]),
                 )
                 if not description_strategy
                 else description_strategy
@@ -195,7 +195,7 @@ def mod_config_payload(
         "author": draw(
             text(
                 max_size=MOD_AUTHOR_MAX_LENGTH,
-                alphabet=characters(blacklist_categories=["Cc", "Zl"]),
+                alphabet=characters(blacklist_categories=["Cc", "Cs", "Zl"]),
             )
             if not author_strategy
             else author_strategy
@@ -204,7 +204,7 @@ def mod_config_payload(
             lists(
                 text(
                     max_size=MOD_CONTRIBUTOR_MAX_LENGTH,
-                    alphabet=characters(blacklist_categories=["Cc", "Zl"]),
+                    alphabet=characters(blacklist_categories=["Cc", "Cs", "Zl"]),
                 )
             )
             if not contributors_strategy
