@@ -1,0 +1,131 @@
+# -*- encoding: utf-8 -*-
+# Copyright (c) 2020 Modist Team <admin@modist.io>
+# ISC License <https://opensource.org/licenses/isc>
+
+"""The front-facing client for utilizing logging within Modist's core."""
+
+import sys
+from functools import lru_cache
+
+import loguru
+from loguru._logger import Logger
+
+from . import captures, handles
+from .patchers import patch_logger
+
+# Custom logger color patterns to make things a bit prettier
+LOGGER_LEVELS = [
+    {"name": "TRACE", "color": "<fg #ffffff><bg #757575>"},
+    {"name": "DEBUG", "color": "<fg #757575>"},
+    {"name": "INFO", "color": "<fg #2196F3>"},
+    {"name": "SUCCESS", "color": "<fg #66BB6A><bold>"},
+    {"name": "WARNING", "color": "<fg #FFA000>"},
+    {"name": "ERROR", "color": "<fg #E53935><bold>"},
+    {"name": "CRITICAL", "color": "<fg #ffffff><bg #E53935><bold>"},
+]
+
+STDOUT_HANDLER = dict(sink=sys.stdout, level="TRACE", backtrace=True, diagnose=True)
+
+# The overall logging configuration we use for our application's root logger
+# https://bit.ly/2NV6al8
+LOGGER_DEFAULT_CONFIG = dict(levels=LOGGER_LEVELS, handlers=[STDOUT_HANDLER])
+
+
+def configure_logger(
+    logger_config: dict = LOGGER_DEFAULT_CONFIG,
+    capture_warnings: bool = False,
+    propagate: bool = False,
+    intercept: bool = False,
+):
+    """Configure the root logger based on what settings we have declared.
+
+    For additional information on what to define in the ``logger_config`` parameter,
+    checkout the `Loguru configuration <https://bit.ly/2NV6al8>`_.
+
+    .. important:: Everytime this method is called we are cycling the added handlers and
+        thus their logger ids. This is required to implement the subsequent toggling of
+        features that loguru handles. Because of this, the returned loguru handler ids
+        are unreliable as they may be cycled by any other module which has imported this
+        method.
+        *In a perfect world* we should only ever configure the logger once and only once
+        at the beginning of execution and toggle features using environment variables.
+        Because of this, *it is recommended to avoid calling this method at all*. The
+        necessary logic to configure loguru is already provided in the
+        :func:`modist.log.client.get_logger` method and can be easily accessed via
+        the ``instance`` property:
+
+        >>> from modist.log import instance as log
+        >>> log.info("This is a message")
+
+
+    :param dict logger_config: Loguru logger configuration dictionary
+    :param bool capture_warnings: Logger captures all Python warnings if set to True,
+        defaults to False
+    :param bool propagate: Logger propagates all log records to Python's builtin logging
+        library if set to True, defaults to False
+    """
+
+    if propagate and intercept:
+        raise ValueError(
+            "Cannot both propagate and intercept Python logging at the same time, "
+            "this creates a circular dependency with how logging records are handled"
+        )
+
+    loguru.logger.configure(**logger_config)
+
+    if capture_warnings:
+        captures.python_warnings.capture(loguru.logger)  # type: ignore
+    else:
+        captures.python_warnings.release()
+
+    # NOTE: We are forced to ignore types against loguru.logger as it performs partial
+    # and renamed imports from loguru._logger.Logger as _Logger which breaks mypy
+    # analysis and really can't safely be retyped in this module
+
+    # TODO: I would like to generalize this adding and removing of handlers since this
+    # code looks a little too duplicative
+    if propagate:
+        handles.python_logging.PropagateHandler.add_handle(
+            loguru.logger  # type: ignore
+        )
+    else:
+        handles.python_logging.PropagateHandler.remove_handle(
+            loguru.logger  # type: ignore
+        )
+
+    if intercept:
+        handles.python_logging.InterceptHandler.add_handle(
+            loguru.logger  # type: ignore
+        )
+    else:
+        handles.python_logging.InterceptHandler.remove_handle(
+            loguru.logger  # type: ignore
+        )
+
+
+@lru_cache(maxsize=2)
+def get_logger() -> Logger:
+    """Get a logger instance that can be used right out of the box.
+
+    >>> from modist.log import get_logger
+    >>> log = get_logger()
+    >>> log.info("This is a message")
+    2019-09-25 15:53:08.295 | INFO     | __main__:20 - This is a message
+
+    :return: A logger instance
+    :rtype: Logger
+    """
+
+    # build a patched logger instance based on record patches we support in `patchers`
+    patched_logger: Logger = patch_logger(loguru.logger)  # type: ignore
+
+    # NOTE: loguru does not supply the deprecated (?) `warn()` alias for `warning()`.
+    # So we just patch that alias in, users should utilize `warning` instead of `warn`.
+    setattr(patched_logger, "warn", patched_logger.warning)
+
+    return patched_logger
+
+
+instance: Logger = get_logger()
+"""An already instantiated logger instance that you can quickly use to log anything.
+"""

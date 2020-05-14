@@ -1,0 +1,5 @@
+# -*- encoding: utf-8 -*-
+# Copyright (c) 2020 Modist Team <admin@modist.io>
+# ISC License <https://opensource.org/licenses/isc>
+
+"""Contains unit-tests for the logging captures."""
