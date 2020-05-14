@@ -4,11 +4,11 @@
 
 """Contains the root mod section of the mod configuration."""
 
-from typing import Dict, Generic, List, Optional
+from typing import Dict, List, Optional
 
 from pydantic import Field, HttpUrl, validator
 
-from .._common import BaseConfig, Config_T
+from .._common import BaseConfig
 from .._types import SemanticSpec, SemanticVersion
 from .meta import MetaConfig
 from .require import RequireConfig
@@ -34,7 +34,7 @@ MOD_AUTHOR_MAX_LENGTH = 64
 MOD_CONTRIBUTOR_MAX_LENGTH = 64
 
 
-class ModConfig(BaseConfig, Generic[Config_T]):
+class ModConfig(BaseConfig):
     """Defines the structure of the base mod config."""
 
     name: str = Field(

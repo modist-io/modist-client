@@ -4,7 +4,7 @@
 
 """Contains the base functionality all configs should have."""
 
-from typing import Generic, Type, TypeVar
+from typing import Type, TypeVar
 
 import rapidjson as json
 from pydantic import BaseModel
@@ -14,7 +14,7 @@ from ._types import SemanticSpec, SemanticVersion
 Config_T = TypeVar("Config_T")
 
 
-class BaseConfig(BaseModel, Generic[Config_T]):
+class BaseConfig(BaseModel):
     """The base config model for all serializable config models.
 
     .. important:: This model provides the utilized ``json_encoders`` necessary to
