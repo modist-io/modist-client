@@ -9,7 +9,7 @@ import abc
 from loguru._logger import Logger
 
 
-class AbstractLogHandler(abc.ABC):
+class BaseLogHandler(abc.ABC):
     """The abstract handler interface for how log handlers should be built."""
 
     @abc.abstractclassmethod

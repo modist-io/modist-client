@@ -12,10 +12,10 @@ from typing import Any, Dict, List, Optional
 import loguru
 from loguru._logger import Logger
 
-from ._common import AbstractLogHandler
+from ._common import BaseLogHandler
 
 
-class PropagateHandler(AbstractLogHandler):
+class PropagateHandler(BaseLogHandler):
     """Propagate Loguru's logging records to Python's builtin logging."""
 
     _handler_reference: Dict[Any, int] = {}
@@ -113,16 +113,25 @@ class PropagateHandler(AbstractLogHandler):
             # `handler_id` won't exist in our references. Another reason to only
             # configure the loguru logger only once at startup and avoid doing
             # subsequent calls to `modist.log.configure_logger`.
-            pass
+            return False
         finally:
             if logger in cls._handler_reference:
                 del cls._handler_reference[logger]
 
-        return False
 
+class InterceptHandler(BaseLogHandler):
+    """Intercept Python's builtin logging as Loguru logging records.
 
-class InterceptHandler(AbstractLogHandler):
-    """Intercept Python's builtin logging as Loguru logging records."""
+    .. important:: Python log intercepting is not very robust or dynamic. You bascially
+        need to decided if you want to intercept all logs or if you want to ignore other
+        module's log's at the very start of runtime. You can't update constructed
+        loggers from Python's builtin :mod:`logging` after they have been defined.
+
+        Also any third-party module that calls :func:`logging.basicConfig` and resets
+        global logging handlers will break this handler. Your best course of action is
+        to just accept that Python's logging will always suck and only worry about your
+        own modules logging.
+    """
 
     _is_intercepting: bool = False
     _previous_handlers: List[Any] = []
@@ -147,7 +156,7 @@ class InterceptHandler(AbstractLogHandler):
 
             return default_level
 
-        def emit(self, record: logging.LogRecord):
+        def emit(self, record: logging.LogRecord):  # pragma: no cover
             """Given a :class:`logging.LogRecord` from logging, handle it with Loguru logging.
 
             :param logging.LogRecord record: The log record to handle

@@ -9,7 +9,7 @@ from loguru._logger import Logger
 from pytest import fixture
 
 
-@fixture
+@fixture(scope="session")
 def loguru_logger() -> Logger:
     """Get the default loguru logger instance.
 
