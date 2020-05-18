@@ -98,7 +98,7 @@ class Mod:
             )
             config_path = Mod.build_mod_config_path(dirpath)
             with config_path.open("w") as config_io:
-                config_io.write(config.to_json())
+                config_io.write(config.to_json(indent=2))
 
             return cls(config=config, path=dirpath)
         except Exception as exc:

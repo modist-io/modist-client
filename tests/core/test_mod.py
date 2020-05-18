@@ -15,6 +15,7 @@ import pytest
 from hypothesis import assume, given
 
 from modist.config.mod.mod import ModConfig
+from modist.context import instance as ctx
 from modist.core.mod import MOD_CONFIG_NAME, MOD_DIRECTORY_MODE, MOD_DIRECTORY_NAME, Mod
 from modist.exceptions import IsAMod, NotAMod
 
@@ -179,9 +180,16 @@ def test_Mod_from_dir_raises_NotAMod_with_missing_mod_config(payload: dict):
             Mod.from_dir(dirpath=mod.path)
 
 
+@pytest.mark.skipif(
+    ctx.system.is_windows,
+    reason="os specific test only works on Posix compatable systems",
+)
 @given(minimal_mod_config_payload())
 def test_Mod_from_dir_fixes_invalid_mod_directory_mode(payload: dict):
     """Ensure Mod from_dir classmethod fixes mod directory with invalid stat mode."""
+
+    # TODO: Need to find the appropriate method for testing this directory mod in
+    # NT-based systems as their st_mode mask is confusing to me
 
     with TemporaryDirectory() as temp_dirname:
         mod = Mod.create(dirpath=Path(temp_dirname), **payload)
