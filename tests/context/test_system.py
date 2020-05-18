@@ -127,7 +127,7 @@ def test_get_os_version_windows():
 
 @pytest.mark.skipif(
     system.get_os() != system.OperatingSystem.MacOS,
-    reason="os specific tests only runs on MacOS",
+    reason="os specific test only runs on MacOS",
 )
 def test_get_os_version_mac():
     """Ensure call to get_os_version works as expected on MacOS."""
@@ -239,7 +239,7 @@ def test_get_is_elevated_with_invalid_os():
 @pytest.mark.skipif(
     system.get_os()
     not in (system.OperatingSystem.MacOS, system.OperatingSystem.Linux,),
-    reason="os specific tests only runs on MacOS or Linux",
+    reason="os specific test only runs on MacOS or Linux",
 )
 def test_get_is_elevated_posix():
     """Ensure call to get_is_elevated works as expected on Posix systems."""
