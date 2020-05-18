@@ -8,7 +8,7 @@ from typing import List, Optional
 
 from pydantic import Field
 
-from ...core.context.system import OperatingSystem, ProcessorArchitecture
+from ...context.system import OperatingSystem, ProcessorArchitecture
 from .._common import BaseConfig
 from .._types import SemanticSpec
 
