@@ -345,3 +345,45 @@ def test_SystemContext_default():
     assert ctx.cwd == system.get_cwd()
 
     assert ctx.user == system.UserContext()
+
+
+@pytest.mark.skipif(
+    system.get_os() != system.OperatingSystem.Windows,
+    reason="os specific test only runs on Windows",
+)
+def test_SystemContext_is_windows():
+    """Ensure the SystemContext is_windows property works properly."""
+
+    ctx = system.SystemContext()
+    assert ctx.is_windows
+    assert not ctx.is_macos
+    assert not ctx.is_linux
+    assert not ctx.is_posix
+
+
+@pytest.mark.skipif(
+    system.get_os() != system.OperatingSystem.MacOS,
+    reason="os specific test only runs on MacOS",
+)
+def test_SystemContext_is_macos():
+    """Ensure the SystemContext is_macos property works properly."""
+
+    ctx = system.SystemContext()
+    assert not ctx.is_windows
+    assert ctx.is_macos
+    assert not ctx.is_linux
+    assert ctx.is_posix
+
+
+@pytest.mark.skipif(
+    system.get_os() != system.OperatingSystem.Linux,
+    reason="os specific test only runs on Linux",
+)
+def test_SystemContext_is_linux():
+    """Ensure the SystemContext is_linux property works properly."""
+
+    ctx = system.SystemContext()
+    assert not ctx.is_windows
+    assert not ctx.is_macos
+    assert ctx.is_linux
+    assert ctx.is_posix

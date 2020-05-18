@@ -284,3 +284,27 @@ class SystemContext:
     cwd: Path = field(default_factory=get_cwd)
 
     user: UserContext = field(default_factory=UserContext)
+
+    @property
+    def is_windows(self) -> bool:
+        """Get ``True`` if the current operating system is Windows."""
+
+        return self.os == OperatingSystem.Windows
+
+    @property
+    def is_macos(self) -> bool:
+        """Get ``True`` if the current operating system is MacOS."""
+
+        return self.os == OperatingSystem.MacOS
+
+    @property
+    def is_linux(self) -> bool:
+        """Get ``True`` if the current operating system is Linux."""
+
+        return self.os == OperatingSystem.Linux
+
+    @property
+    def is_posix(self) -> bool:
+        """Get ``True`` if the current operating system is Posix compatible."""
+
+        return self.os in (OperatingSystem.MacOS, OperatingSystem.Linux,)
