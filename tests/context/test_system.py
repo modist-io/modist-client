@@ -4,6 +4,7 @@
 
 """Contains unit-tests for System context features."""
 
+import os
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
@@ -201,12 +202,12 @@ def test_get_is_elevated():
         with patch.object(system, "get_os") as mocked_get_os:
             mocked_get_os.return_value = posix_os_type
 
-            with patch.object(system.os, "geteuid") as mocked_geteuid:
-                mocked_geteuid.return_value = 0
+            with patch.object(system, "os") as mocked_os:
+                mocked_os.geteuid.return_value = 0
                 assert system.get_is_elevated()
 
-                mocked_geteuid.reset_mock()
-                mocked_geteuid.return_value = 1
+                mocked_os.geteuid.reset_mock()
+                mocked_os.geteuid.return_value = 1
                 assert not system.get_is_elevated()
 
     # windows-specific full-mock tests
@@ -260,7 +261,11 @@ def test_get_is_elevated_windows():
     """Ensure call to get_is_elevated works as expected on Windows."""
 
     with patch.object(system, "ctypes", wraps=system.ctypes) as mocked_ctypes:
-        assert not system.get_is_elevated()
+        if os.environ.get("CI", False):
+            # NOTE: Github CI tests run with administrator priveledges
+            assert system.get_is_elevated()
+        else:
+            assert not system.get_is_elevated()
         system.ctypes.windll.shell32.IsUserAnAdmin.assert_called_once()
 
     with patch.object(system, "ctypes") as mocked_ctypes:
