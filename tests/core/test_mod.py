@@ -182,7 +182,7 @@ def test_Mod_from_dir_raises_NotAMod_with_missing_mod_config(payload: dict):
 
 @pytest.mark.skipif(
     ctx.system.is_windows,
-    reason="os specific tests only works on Posix compatable systems",
+    reason="os specific test only works on Posix compatable systems",
 )
 @given(minimal_mod_config_payload())
 def test_Mod_from_dir_fixes_invalid_mod_directory_mode(payload: dict):

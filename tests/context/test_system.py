@@ -5,7 +5,7 @@
 """Contains unit-tests for System context features."""
 
 import os
-from pathlib import Path
+from pathlib import Path, WindowsPath
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
@@ -115,7 +115,7 @@ def test_get_os_version_returns_None():
 
 @pytest.mark.skipif(
     system.get_os() != system.OperatingSystem.Windows,
-    reason="os specific test only runs on Windows",
+    reason="os specific test only works in Windows",
 )
 def test_get_os_version_windows():
     """Ensure call to get_os_version works as expected on Windows."""
@@ -127,7 +127,7 @@ def test_get_os_version_windows():
 
 @pytest.mark.skipif(
     system.get_os() != system.OperatingSystem.MacOS,
-    reason="os specific test only runs on MacOS",
+    reason="os specific test only works in MacOS",
 )
 def test_get_os_version_mac():
     """Ensure call to get_os_version works as expected on MacOS."""
@@ -139,7 +139,7 @@ def test_get_os_version_mac():
 
 @pytest.mark.skipif(
     system.get_os() != system.OperatingSystem.Linux,
-    reason="os specific test only runs on Linux",
+    reason="os specific test only works in Linux",
 )
 def test_get_os_version_linux():
     """Ensure call to get_os_version works as expected on Linux."""
@@ -239,7 +239,7 @@ def test_get_is_elevated_with_invalid_os():
 @pytest.mark.skipif(
     system.get_os()
     not in (system.OperatingSystem.MacOS, system.OperatingSystem.Linux,),
-    reason="os specific test only runs on MacOS or Linux",
+    reason="os specific test only works in MacOS or Linux",
 )
 def test_get_is_elevated_posix():
     """Ensure call to get_is_elevated works as expected on Posix systems."""
@@ -255,7 +255,7 @@ def test_get_is_elevated_posix():
 
 @pytest.mark.skipif(
     system.get_os() != system.OperatingSystem.Windows,
-    reason="os specific test only runs on Windows",
+    reason="os specific test only works in Windows",
 )
 def test_get_is_elevated_windows():
     """Ensure call to get_is_elevated works as expected on Windows."""
@@ -283,13 +283,30 @@ def test_get_username(username: str):
         assert system.get_username() == username
 
 
+@pytest.mark.skipif(
+    system.get_os() == system.OperatingSystem.Windows,
+    reason="os specific test only works in Posix compatible systems",
+)
 @given(pathlib_path())
-def test_get_home_dir(path: Path):
-    """Ensure call to get_home_dir works as expected."""
+def test_get_home_dir_posix(path: Path):
+    """Ensure call to get_home_dir works as expected in Posix compatible systems."""
 
     assert isinstance(system.get_home_dir(), Path)
     with os_environ({"HOME": path.as_posix()}):
         assert system.get_home_dir() == path
+
+
+@pytest.mark.skipif(
+    system.get_os() != system.OperatingSystem.Windows,
+    reason="os specific test only works in Windows",
+)
+def test_get_home_dir_windows():
+    """Ensure call to get_home_dir works as expected in Windows."""
+
+    # NOTE: WindowsPath does not obey the $HOME environment variable, so testing with
+    # changing $HOME will not work. The best we can do here is ensure that the found
+    # path is a WindowsPath rathern than just a regular ol' Path or PurePath
+    assert isinstance(system.get_home_dir(), WindowsPath)
 
 
 def test_get_config_dir():
@@ -354,7 +371,7 @@ def test_SystemContext_default():
 
 @pytest.mark.skipif(
     system.get_os() != system.OperatingSystem.Windows,
-    reason="os specific test only runs on Windows",
+    reason="os specific test only works in Windows",
 )
 def test_SystemContext_is_windows():
     """Ensure the SystemContext is_windows property works properly."""
@@ -368,7 +385,7 @@ def test_SystemContext_is_windows():
 
 @pytest.mark.skipif(
     system.get_os() != system.OperatingSystem.MacOS,
-    reason="os specific test only runs on MacOS",
+    reason="os specific test only works in MacOS",
 )
 def test_SystemContext_is_macos():
     """Ensure the SystemContext is_macos property works properly."""
@@ -382,7 +399,7 @@ def test_SystemContext_is_macos():
 
 @pytest.mark.skipif(
     system.get_os() != system.OperatingSystem.Linux,
-    reason="os specific test only runs on Linux",
+    reason="os specific test only works in Linux",
 )
 def test_SystemContext_is_linux():
     """Ensure the SystemContext is_linux property works properly."""
