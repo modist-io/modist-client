@@ -24,6 +24,8 @@ readme_renderer = {version = "*", extras = ["md"]}
 pip-licenses = "*"
 rope = "*"
 wheel = "*"
+sphinx = "*"
+sphinx-material = "*"
 
 [requires]
 python_version = "3.7"
