@@ -41,7 +41,7 @@ def get_version() -> Version:
 
     :return: The approximate :class:`~semantic_version.Version` instance for the current
         Python release version
-    :rtype: Version
+    :rtype: ~semantic_version.Version
     """
 
     return Version.coerce(python_version())
@@ -51,7 +51,7 @@ def get_path() -> Optional[Path]:
     """Determine the current Python runtime path.
 
     :return: The :class:`pathlib.Path` instance to the current Python path if found
-    :rtype: Optional[Path]
+    :rtype: Optional[pathlib.Path]
     """
 
     path_entry = PythonFinder().which("python")

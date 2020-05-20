@@ -6,6 +6,7 @@
 
 import sys
 from functools import lru_cache
+from typing import Optional
 
 import loguru
 from loguru._logger import Logger
@@ -32,7 +33,7 @@ LOGGER_DEFAULT_CONFIG = dict(levels=LOGGER_LEVELS, handlers=[STDOUT_HANDLER])
 
 
 def configure_logger(
-    logger_config: dict = LOGGER_DEFAULT_CONFIG,
+    logger_config: Optional[dict] = None,
     capture_warnings: bool = False,
     propagate: bool = False,
     intercept: bool = False,
@@ -51,14 +52,14 @@ def configure_logger(
         at the beginning of execution and toggle features using environment variables.
         Because of this, *it is recommended to avoid calling this method at all*. The
         necessary logic to configure loguru is already provided in the
-        :func:`modist.log.client.get_logger` method and can be easily accessed via
+        :meth:`~modist.log.get_logger` method and can be easily accessed via
         the ``instance`` property:
 
         >>> from modist.log import instance as log
         >>> log.info("This is a message")
 
 
-    :param dict logger_config: Loguru logger configuration dictionary
+    :param Optional[dict] logger_config: Loguru logger configuration dictionary
     :param bool capture_warnings: Logger captures all Python warnings if set to True,
         defaults to False
     :param bool propagate: Logger propagates all log records to Python's builtin logging
@@ -70,6 +71,9 @@ def configure_logger(
             "Cannot both propagate and intercept Python logging at the same time, "
             "this creates a circular dependency with how logging records are handled"
         )
+
+    if not logger_config:
+        logger_config = LOGGER_DEFAULT_CONFIG
 
     loguru.logger.configure(**logger_config)
 
@@ -113,7 +117,7 @@ def get_logger() -> Logger:
     2019-09-25 15:53:08.295 | INFO     | __main__:20 - This is a message
 
     :return: A logger instance
-    :rtype: Logger
+    :rtype: ~loguru._logger.Logger
     """
 
     # build a patched logger instance based on record patches we support in `patchers`

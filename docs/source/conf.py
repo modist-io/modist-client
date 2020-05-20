@@ -54,7 +54,11 @@ release = metadata["version"]
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["sphinx.ext.autodoc", "sphinx.ext.intersphinx", "sphinx.ext.viewcode"]
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.viewcode",
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -94,31 +98,28 @@ html_theme = "sphinx_material"
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#
+
 html_theme_options = {
     "nav_title": title,
     "base_url": metadata["url"],
     "color_primary": "blue-grey",
     "color_accent": "light-blue",
     "repo_url": metadata["url"],
-    "repo_name": title,
-    "globaltoc_depth": 3,
-    "globaltoc_collapse": False,
-    "globaltoc_includehidden": False
-    # "description": metadata["description"],
-    # "github_user": "modist-io",
-    # "github_repo": "modist-client",
-    # "github_type": "star",
-    # "page_width": "1000px",
-    # "sidebar_width": "220px",
-    # "sidebar_collapse": True,
-    # "fixed_sidebar": True,
+    "repo_name": "/".join(metadata["url"].split("/")[-2:]),
+    "repo_type": "github",
+    "globaltoc_depth": 2,
+    "globaltoc_collapse": True,
+    "globaltoc_includehidden": False,
+    "master_doc": True,
+    "touch_icon": "_static/img/icon.png",
+    "logo_icon": "&#xe30d",
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
+html_css_files = ["css/tweaks.css"]
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -127,8 +128,11 @@ html_static_path = ["_static"]
 # defined by theme itself.  Builtin themes are using these templates by
 # default: ``['localtoc.html', 'relations.html', 'sourcelink.html',
 # 'searchbox.html']``.
-#
-# html_sidebars = {}
+
+html_favicon = "_static/favicon.ico"
+html_sidebars = {
+    "**": ["logo-text.html", "globaltoc.html", "localtoc.html", "searchbox.html"]
+}
 
 
 # -- Options for HTMLHelp output ---------------------------------------------
@@ -213,7 +217,16 @@ epub_exclude_files = ["search.html"]
 
 # -- Extension configuration -------------------------------------------------
 
+autodoc_typehints = "description"
+
 # -- Options for intersphinx extension ---------------------------------------
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {"python": ("https://docs.python.org/3.7/", None)}
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3.7/", None),
+    "loguru": ("https://loguru.readthedocs.io/en/stable/", None),
+    "semantic_version": (
+        "https://python-semanticversion.readthedocs.io/en/latest/",
+        None,
+    ),
+}

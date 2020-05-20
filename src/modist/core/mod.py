@@ -41,9 +41,9 @@ class Mod:
     def build_mod_directory_path(base_path: Path) -> Path:
         """Produce the mod directory path instance from the base directory path.
 
-        :param Path base_path: The base directory path
+        :param pathlib.Path base_path: The base directory path
         :return: The constructed mod directory path instance
-        :rtype: Path
+        :rtype: pathlib.Path
         """
 
         return base_path / MOD_DIRECTORY_NAME
@@ -52,9 +52,9 @@ class Mod:
     def build_mod_config_path(base_path: Path) -> Path:
         """Produce the mod config file path instance from the base directory path.
 
-        :param Path base_path: The base directory path
+        :param pathlib.Path base_path: The base directory path
         :return: The constructed mod config file path instance
-        :rtype: Path
+        :rtype: pathlib.Path
         """
 
         return Mod.build_mod_directory_path(base_path) / MOD_CONFIG_NAME

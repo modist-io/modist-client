@@ -5,7 +5,8 @@ Getting Started
 ===============
 
 | **Welcome to Modist Client!**
-| This page should hopefully provide you with enough information to get you started defining, serializing, and validating config instances.
+| This page should hopefully provide you with enough information to get you started building and interacting with the Modist ecosystem.
+
 
 Installation and Setup
 ======================
