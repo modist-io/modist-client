@@ -1,7 +1,7 @@
 .. _package.modist.context:
 
-Context
-=======
+``modist.context``
+==================
 
    The purpose of this module is to provide a standard way of accessing identifying
    information about the current client's runtime.
@@ -27,7 +27,7 @@ Context
 
 
 Modist Context
-==============
+--------------
 
    The Modist context contains basic information about the current client. Details such
    as :data:`~ModistContext.name` and :data:`~ModistContext.version` are useful for
@@ -38,7 +38,7 @@ Modist Context
 
 
 System Context
-==============
+--------------
 
    The system context contains details about the current runtime's host system. This
    information is typically going to be used for making decisions for
@@ -53,7 +53,7 @@ System Context
 
 
 Python Context
-==============
+--------------
 
    The Python context contains details about the current Python runtime. This
    information is mostly used for determining the source of errors or providing helpful

@@ -1,7 +1,7 @@
 .. _package.modist.core:
 
-Core
-====
+``modist.core``
+===============
 
 .. automodule:: modist.core
    :members:

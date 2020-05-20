@@ -1,7 +1,7 @@
 .. _package.modist.config:
 
-Config
-======
+``modist.config``
+=================
 
 .. automodule:: modist.config
    :members:

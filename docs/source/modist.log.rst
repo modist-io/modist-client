@@ -1,7 +1,7 @@
 .. _package.modist.log:
 
-Logging
-=======
+``modist.log``
+==============
 
 .. automodule:: modist.log
    :members:

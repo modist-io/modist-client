@@ -1,7 +1,7 @@
 .. _package.modist.exceptions:
 
-Exceptions
-==========
+``modist.exceptions``
+=====================
 
 .. automodule:: modist.exceptions
    :members:

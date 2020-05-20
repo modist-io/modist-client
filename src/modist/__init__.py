@@ -2,4 +2,12 @@
 # Copyright (c) 2020 Modist Team <admin@modist.io>
 # ISC License <https://choosealicense.com/licenses/isc>
 
-"""Contains the root-level module imports."""
+"""The base Modist client module.
+
+>>> import modist
+>>> my_mod = modist.core.Mod()
+"""
+
+from . import __version__
+
+__all__ = ["__version__"]
