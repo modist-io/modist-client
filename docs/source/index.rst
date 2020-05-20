@@ -1,3 +1,5 @@
+.. _index:
+
 .. raw:: html
 
    <h1 align="center" style="font-size: 64px;">Modist Client</h1>
@@ -15,21 +17,23 @@ The local client for managing Modist mods
 
 **To get started using this package, please see the** :ref:`getting-started` **page!**
 
-User Documentation
-------------------
 
 .. toctree::
+   :caption: Usage
    :maxdepth: 2
 
    getting-started
+   advanced-usage
+   faq
    contributing
-   changelog
 
-
-Project Reference
------------------
 
 .. toctree::
-   :maxdepth: 2
+   :caption: Reference
+   :maxdepth: 1
 
    modist
+   changelog
+   code-of-conduct
+   license
+

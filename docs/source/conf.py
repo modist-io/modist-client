@@ -110,14 +110,9 @@ html_theme_options = {
     "globaltoc_depth": 2,
     "globaltoc_collapse": True,
     "globaltoc_includehidden": False,
+    "master_doc": True,
     "touch_icon": "_static/img/icon.png",
     "logo_icon": "&#xe30d",
-    "heroes": {
-        "index": metadata["description"],
-        "getting-started": "Getting Started",
-        "changelog": "Changelog",
-        "contributing": "Contributing",
-    },
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -134,7 +129,7 @@ html_css_files = ["css/tweaks.css"]
 # default: ``['localtoc.html', 'relations.html', 'sourcelink.html',
 # 'searchbox.html']``.
 
-html_favicon = "favicon.ico"
+html_favicon = "_static/favicon.ico"
 html_sidebars = {
     "**": ["logo-text.html", "globaltoc.html", "localtoc.html", "searchbox.html"]
 }
