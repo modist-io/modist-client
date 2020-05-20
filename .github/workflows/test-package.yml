@@ -3,7 +3,7 @@ on: [push, pull_request]
 jobs:
   test:
     strategy:
-      max-parallel: 3
+      max-parallel: 4
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
         python-version: [3.7, 3.8]
@@ -23,11 +23,11 @@ jobs:
         run: |
           pytest -p no:warnings
       - name: Build Coverage Report
-        if: ${{ success() }} && ${{ matrix.os }} == 'ubuntu-latest' && ${{ matrix.python-version }} == 3.7
+        if:  ${{ success() && matrix.os == 'ubuntu-latest' && matrix.python-version == 3.7 }}
         run: |
           coverage xml -o cobertura.xml
       - name: Publish Coverage
-        if: ${{ success() }} && ${{ matrix.os }} == 'ubuntu-latest' && ${{ matrix.python-version }} == 3.7
+        if: ${{ success() && matrix.os == 'ubuntu-latest' && matrix.python-version == 3.7 }}
         uses: codacy/codacy-coverage-reporter-action@master
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
