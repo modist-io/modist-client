@@ -35,6 +35,7 @@ LOGGER_DEFAULT_CONFIG = dict(levels=LOGGER_LEVELS, handlers=[STDOUT_HANDLER])
 def configure_logger(
     logger_config: Optional[dict] = None,
     capture_warnings: bool = False,
+    capture_exceptions: bool = False,
     propagate: bool = False,
     intercept: bool = False,
 ):
@@ -59,11 +60,25 @@ def configure_logger(
         >>> log.info("This is a message")
 
 
+    .. caution:: This method cannot handle both propagation and interception of logs as
+        doing so would result in a recursive event where all logged propagated messages
+        would be intercepted and re-propagated. In reality, you should
+        **rarely if ever** be using ``intercept`` as you *almost* never want to override
+        how Python's default logging works. Since so much external tooling depends on
+        Python's nasty logging framework, intercepting logs is seen as a bad practice.
+
+
     :param Optional[dict] logger_config: Loguru logger configuration dictionary
     :param bool capture_warnings: Logger captures all Python warnings if set to True,
         defaults to False
+    :param bool capture_exceptions: Logger captures all unhandled Python exceptions if
+        set to True, defaults to False
     :param bool propagate: Logger propagates all log records to Python's builtin logging
         library if set to True, defaults to False
+    :param bool intercept: Logger intercepts all log records from **previously built**
+        Python loggging loggers and relogs messages to the loguru logger if set to True,
+        defaults to False
+    :raises ValueError: When both ``propagate`` and ``intercept`` are truthy
     """
 
     if propagate and intercept:
@@ -81,6 +96,11 @@ def configure_logger(
         captures.python_warnings.capture(loguru.logger)  # type: ignore
     else:
         captures.python_warnings.release()
+
+    if capture_exceptions:
+        captures.python_exceptions.capture(loguru.logger)  # type: ignore
+    else:
+        captures.python_exceptions.release()
 
     # NOTE: We are forced to ignore types against loguru.logger as it performs partial
     # and renamed imports from loguru._logger.Logger as _Logger which breaks mypy

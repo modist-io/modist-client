@@ -4,6 +4,7 @@
 
 """Contains tests for the module log client."""
 
+import sys
 from unittest.mock import MagicMock, patch
 
 import loguru
@@ -23,6 +24,15 @@ def test_configure_logger(mocked_configure: MagicMock):
 
     configure_logger()
     mocked_configure.assert_called_once_with(**LOGGER_DEFAULT_CONFIG)
+
+
+@patch("modist.log.client.loguru.logger.configure")
+def test_configure_logger_uses_provided_logger_config(mocked_configure: MagicMock):
+    """Ensure configure_logger uses the given loguru logger config."""
+
+    config = {"handlers": {"sink": sys.stdout, "level": "DEBUG"}}
+    configure_logger(config)
+    mocked_configure.assert_called_once_with(**config)
 
 
 def test_configure_logger_raises_ValueError_with_both_propagate_and_intercept():
@@ -45,6 +55,23 @@ def test_configure_logger_captures_warnings(
 
     mocked_capture.reset_mock()
     configure_logger(capture_warnings=False)
+    mocked_capture.assert_not_called()
+    mocked_release.assert_called_once()
+
+
+@patch("modist.log.captures.python_exceptions.capture")
+@patch("modist.log.captures.python_exceptions.release")
+def test_configure_logger_captures_exceptions(
+    mocked_release: MagicMock, mocked_capture: MagicMock,
+):
+    """Ensure calling configure_logger with capture_exceptions works."""
+
+    configure_logger(capture_exceptions=True)
+    mocked_capture.assert_called_once_with(loguru.logger)
+    mocked_release.assert_not_called()
+
+    mocked_capture.reset_mock()
+    configure_logger(capture_exceptions=False)
     mocked_capture.assert_not_called()
     mocked_release.assert_called_once()
 
