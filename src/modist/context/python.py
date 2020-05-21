@@ -2,7 +2,7 @@
 # Copyright (c) 2020 Modist Team <admin@modist.io>
 # ISC License <https://opensource.org/licenses/isc>
 
-"""Contains logic and data types for extracting info about the Python runtime."""
+"""Module that contains logic and factory methods for buiding the Python context."""
 
 from dataclasses import dataclass, field
 from enum import Enum
@@ -18,13 +18,20 @@ class PythonImplementation(Enum):
     """Enumeration of suported Python implementations."""
 
     CPython = "cpython"
+    """Indicates a CPython (base Python) runtime. """
+
     IronPython = "ironpython"
+    """Indicates an IronPython (.NET) runtime."""
+
     Jython = "jython"
+    """Indicates a Jython (Java VM) runtime."""
+
     PyPy = "pypy"
+    """Indicates a PyPy (JIT CPython) runtime."""
 
 
 def get_implementation() -> Optional[PythonImplementation]:
-    """Determine teh current Python implementation.
+    """Determine the current Python implementation.
 
     :return: The appropriate :class:`~PythonImplementation` instance if found
     :rtype: Optional[PythonImplementation]
@@ -50,8 +57,8 @@ def get_version() -> Version:
 def get_path() -> Optional[Path]:
     """Determine the current Python runtime path.
 
-    :return: The :class:`pathlib.Path` instance to the current Python path if found
-    :rtype: Optional[pathlib.Path]
+    :return: The :class:`~pathlib.Path` instance to the current Python path if found
+    :rtype: Optional[~pathlib.Path]
     """
 
     path_entry = PythonFinder().which("python")
@@ -63,7 +70,18 @@ def get_path() -> Optional[Path]:
 
 @dataclass
 class PythonContext:
-    """Contains the context properties of the current Python runtime."""
+    """Dataclass that contains the Python-specific context details.
+
+    >>> from modist.context.python import PythonContext
+    >>> ctx = PythonContext()
+    ctx.version
+
+    :param Optional[~pathlib.Path] path: The path to the current Python executable
+    :param ~semantic_version.Version version: The coerced semantic version of the
+        active Python runtime
+    :param Optional[PythonImplementation] implementation: The current implementation
+        of the active Python runtime
+    """
 
     path: Optional[Path] = field(default_factory=get_path)
     version: Version = field(default_factory=get_version)
