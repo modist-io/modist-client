@@ -13,7 +13,10 @@ class ModistException(Exception):
     """
 
     def __init__(self, message: str):
-        """Initialize the exception instance."""
+        """Initialize the exception instance.
+
+        :param str message: The message of the exception
+        """
 
         self.message = message
         super().__init__(message)
