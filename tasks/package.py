@@ -191,8 +191,7 @@ def stub(ctx):
     ctx.run(
         f"stubgen --include-private --no-import "
         f"--output {ctx.directory.joinpath('stubs')!s} "
-        f"--search-path {ctx.directory.joinpath('src')!s} "
-        f"--package {ctx.metadata['package_name']}"
+        f"{ctx.directory.joinpath('src')!s}/{ctx.metadata['package_name']}"
     )
 
 

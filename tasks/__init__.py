@@ -78,7 +78,7 @@ def clean(ctx):
 def lint(ctx):
     """Lint the project."""
 
-    report.success(ctx, "check", f"checking project {ctx.metadata['name']!r}")
+    report.success(ctx, "lint", f"linting project {ctx.metadata['name']!r}")
 
 
 @invoke.task(pre=[clean, docs.build_news, build])  # noqa
