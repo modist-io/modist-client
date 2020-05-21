@@ -10,7 +10,7 @@ from semantic_version import SimpleSpec, Version, validate
 
 
 class SemanticVersion(Version):
-    """Custom subclass of :class:`semantic_version.Version` for pydantic field support.
+    """Custom :class:`semantic_version.Version` for pydantic field support.
 
     Use this class just like a regular ol' pydantic field:
     >>> from ._types import SemanticVersion
@@ -75,7 +75,7 @@ class SemanticVersion(Version):
 
 
 class SemanticSpec(SimpleSpec):
-    """Custom subclass of :class:`semantic_version.SimpleSpec` for pydantic field support.
+    """Custom :class:`semantic_version.SimpleSpec` for pydantic field support.
 
     Use this class just like a regular ol' pydantic field:
     >>> from ._types import SemanticSpec

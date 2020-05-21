@@ -2,7 +2,7 @@
 # Copyright (c) 2020 Modist Team <admin@modist.io>
 # ISC License <https://opensource.org/licenses/isc>
 
-"""Contains logging captures specific to Loguru for Python warning event captures.
+"""Contains logging captures specific to Loguru for Python warning events.
 
 This module provides the necessary functions to enable capturing of raised Python
 warnings as :func:`logging.warning` messages. This typically provides enough output to

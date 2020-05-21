@@ -64,7 +64,7 @@ class PropagateHandler(BaseLogHandler):
         """Log handler that propagates Loguru logs to Python's builtin logging."""
 
         def handle(self, record: logging.LogRecord):
-            """Given a :class:`logging.LogRecord` from Loguru, handle it with Python logging.
+            """Given a :class:`logging.LogRecord`, handle it with Python logging.
 
             :param ~logging.LogRecord record: The log record to handle
             """
@@ -219,7 +219,7 @@ class InterceptHandler(BaseLogHandler):
             return default_level
 
         def emit(self, record: logging.LogRecord):  # pragma: no cover
-            """Given a :class:`logging.LogRecord` from logging, handle it with Loguru logging.
+            """Given a :class:`logging.LogRecord`, handle it with Loguru logging.
 
             :param ~logging.LogRecord record: The log record to handle
             """
