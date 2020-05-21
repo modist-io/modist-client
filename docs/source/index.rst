@@ -30,9 +30,15 @@ The local client for managing Modist mods
 
 .. toctree::
    :caption: Reference
-   :maxdepth: 1
+   :maxdepth: 2
 
    modist
+
+
+.. toctree::
+   :caption: Project
+   :maxdepth: 1
+
    changelog
    code-of-conduct
    license

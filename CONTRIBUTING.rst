@@ -201,7 +201,8 @@ provided ``invoke`` development dependency.
       package.version        Specify a new version for the package.
 
 
-You can run these tasks to do many miscellaneous project tasks such as building documentation.
+You can run these tasks to do many miscellaneous project tasks such as building
+documentation.
 
 .. code-block:: console
 
@@ -225,7 +226,8 @@ eventually after required tooling gets enough major updates.
 Opening Issues
 ==============
 
-Issues should follow the included ``ISSUE_TEMPLATE`` found in ``.github/ISSUE_TEMPLATE.md``.
+Issues should follow the included ``ISSUE_TEMPLATE`` found in
+``.github/ISSUE_TEMPLATE.md``.
 
 - Issues should contain the following sections:
    - Expected Behavior
@@ -235,12 +237,34 @@ Issues should follow the included ``ISSUE_TEMPLATE`` found in ``.github/ISSUE_TE
    - Context
    - Your Environment
 
-These sections help the developers greatly by providing a large understanding of the context of the bug or requested feature without having to launch a full fleged discussion inside of the issue.
+These sections help the developers greatly by providing a large understanding of the
+context of the bug or requested feature without having to launch a full fleged
+discussion inside of the issue.
 
 Creating Pull Requests
 ======================
 
-Pull requests should follow the included ``PULL_REQUEST_TEMPLATE`` found in ``.github/PULL_REQUEST_TEMPLATE.md``.
+Pull requests should follow the included ``PULL_REQUEST_TEMPLATE`` found in
+``.github/PULL_REQUEST_TEMPLATE.md``.
 
-- Pull requests should always be from a **topic/feature/bugfix** (left side) branch. *Pull requests from master branches will not be merged.*
+- | Pull requests should always be from a ``topic`` / ``feature`` / ``bugfix``
+    (left side) branch.
+  | **Pull requests from master branches will not be merged.**
 - Pull requests should not fail our requested style guidelines or linting checks.
+
+
+Collaboration and Support
+=========================
+
+If you want to become a member of the community and start collaborating to help build
+up the Modist ecosystem in more ways than just development, join our Discord server and
+ask what you can do to help.
+
+We constantly are in need of designers, artists, and (of course) developers. But we also
+appreciate any ideas to help improve and spread usage of Modist.
+
+.. raw:: html
+
+   <div style="text-align: center;">
+      <iframe src="https://discordapp.com/widget?id=702909587719847936&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0"></iframe>
+   </div>
