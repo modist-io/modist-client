@@ -16,7 +16,7 @@ class BaseLogHandler(abc.ABC):
     def is_handled(self, logger: Logger) -> bool:
         """Quick helper method to check if the given logger is already being handled.
 
-        :param Logger logger: The logger to check if already handled
+        :param ~loguru._logger.Logger logger: The logger to check if already handled
         :return: True if the logger is already handled, otherwise False
         :rtype: bool
         """
@@ -27,7 +27,7 @@ class BaseLogHandler(abc.ABC):
     def add_handle(self, logger: Logger) -> bool:
         """Add the logging handler to the given logger instance.
 
-        :param Logger logger: The logger instance to add the handler to
+        :param ~loguru._logger.Logger logger: The logger instance to add the handler to
         :return: True if the handler was added, False if the handle was already present
         :rtype: bool
         """
@@ -38,7 +38,7 @@ class BaseLogHandler(abc.ABC):
     def remove_handle(self, logger: Logger) -> bool:
         """Remove the logging handler from the given logger instance.
 
-        :param Logger logger: The logger instance to remove the handle
+        :param ~loguru._logger.Logger logger: The logger instance to remove the handle
         :return: True if the handler was removed, False if there was no handler present
         :rtype: bool
         """

@@ -2,7 +2,35 @@
 # Copyright (c) 2020 Modist Team <admin@modist.io>
 # ISC License <https://opensource.org/licenses/isc>
 
-"""Loguru handles for Python's builtin logging."""
+"""Contains custom logging handlers for tweaking Python's builtin logging.
+
+This module provides the necessary logic to inject handlers into Python's builtin
+logging to make the integration with Loguru more seemless or feature-full. The two main
+handlers provided in this module are propagation and interception handlers.
+
+As opposed to how :mod:`modist.log.captures.python_warnings` functions
+(mostly functional) we are implementing these handlers as classes since it's *somewhat*
+necessary for a record of handled loggers to be present on the instance itself. I don't
+like it, but it works for now.
+
+    An argument could be made to split these out into two separate modules and maintain
+    runtime data in some constant on the module. For now, I don't see many downsides to
+    doing it this way other than it being a bit strange and not very Pythonic.
+
+An example of what general usage of one of these handlers looks like is show below:
+
+>>> import logging
+>>> builtin_log = logging.getLogger("builtin")
+>>> builtin_log.error("Hello there")
+Hello there
+>>> from modist.log import get_logger
+>>> log = get_logger()
+>>> from modist.log.handles.python_logging import InterceptHandler
+>>> InterceptHandler.add_handle(log)
+True
+>>> builtin_log.error("Hello there")
+2020-05-21 16:35:06.042 | ERROR    | __main__:<module>:1 - Hello there
+"""
 
 import copy
 import logging
@@ -16,7 +44,19 @@ from ._common import BaseLogHandler
 
 
 class PropagateHandler(BaseLogHandler):
-    """Propagate Loguru's logging records to Python's builtin logging."""
+    """Propagate Loguru's logging records to Python's builtin logging.
+
+    You will probaly want to utilize this handler in order to have your loguru log
+    records being logged over Python's builtin logging API for better compatibility with
+    external tools that explicitly monitor Python's builtin logging
+    (such as Sentry, Prometheus, etc.).
+
+    >>> from modist.log import get_logger
+    >>> log = get_logger()
+    >>> from modist.log.handles.python_logging import PropagateHandler
+    >>> PropagateHandler.add_handle(log)
+    True
+    """
 
     _handler_reference: Dict[Any, int] = {}
 
@@ -26,7 +66,7 @@ class PropagateHandler(BaseLogHandler):
         def handle(self, record: logging.LogRecord):
             """Given a :class:`logging.LogRecord` from Loguru, handle it with Python logging.
 
-            :param logging.LogRecord record: The log record to handle
+            :param ~logging.LogRecord record: The log record to handle
             """
 
             logging.getLogger(record.name).handle(record)
@@ -48,7 +88,7 @@ class PropagateHandler(BaseLogHandler):
     def _get_handler_id(cls, logger: Logger) -> Optional[int]:
         """Get the handler's id for the given logger.
 
-        :param Logger logger: The logger to lookup the handler id for
+        :param ~loguru._logger.Logger logger: The logger to lookup the handler id for
         :return: The integer id of the given logger's handler, otherwise None
         :rtype: Optional[int]
         """
@@ -62,7 +102,7 @@ class PropagateHandler(BaseLogHandler):
     def is_handled(cls, logger: Logger) -> bool:
         """Quick helper method to check if the given logger is already being handled.
 
-        :param Logger logger: The logger to check if already handled
+        :param ~loguru._logger.Logger logger: The logger to check if already handled
         :return: True if the logger is already handled, otherwise False
         :rtype: bool
         """
@@ -73,7 +113,7 @@ class PropagateHandler(BaseLogHandler):
     def add_handle(cls, logger: Logger) -> bool:
         """Add the logging handler to the given logger instance.
 
-        :param Logger logger: The logger instance to add the handler to
+        :param ~loguru._logger.Logger logger: The logger instance to add the handler to
         :return: True if the handler was added, False if the handle was already present
         :rtype: bool
         """
@@ -90,7 +130,7 @@ class PropagateHandler(BaseLogHandler):
     def remove_handle(cls, logger: Logger) -> bool:
         """Remove the logging handler from the given logger instance.
 
-        :param Logger logger: The logger instance to remove the handle
+        :param ~loguru._logger.Logger logger: The logger instance to remove the handle
         :return: True if the handler was removed, False if there was no handler present
         :rtype: bool
         """
@@ -109,6 +149,7 @@ class PropagateHandler(BaseLogHandler):
             # NOTE: this occurs in an edge-case where the logger is intialized and a
             # PropagateHandler.Logginghandler is added manually
             # (not using the included methods).
+            #
             # This doesn't really cause any issues in normal execution, just that the
             # `handler_id` won't exist in our references. Another reason to only
             # configure the loguru logger only once at startup and avoid doing
@@ -122,7 +163,28 @@ class PropagateHandler(BaseLogHandler):
 class InterceptHandler(BaseLogHandler):
     """Intercept Python's builtin logging as Loguru logging records.
 
-    .. important:: Python log intercepting is not very robust or dynamic. You bascially
+    You will probably want to use this when you wish another module's logging to passed
+    into whatever Loguru sinks you have configured. This handler was originally added
+    for HTTP API frameworks such as werkzeug's logging needing to be passed through into
+    whatever sinks are configured by the global loguru logging instance.
+
+    .. important:: This handler intercepts all **already defined** builtin logger logs
+        through loguru's log record handling. This means that builtin loggers defined
+        **after** this handler is added will not be captured (and will likely break the
+        configuration we do to support logging intercepts). So if you need to use
+        this handler, do your absolute best to ensure that the call to
+        :meth:`~InterceptHandler.add_handle` is performed after other module using
+        Python's builtin logging are imported and configured.
+
+
+    Some example usage of what using this handler looks like is included below:
+
+    >>> from modist.log import get_logger
+    >>> log = get_logger()
+    >>> from modist.log.handles.python_logging import InterceptHandler
+    >>> InterceptHandler.add_handle(log)
+
+    .. caution:: Python log intercepting is not very robust or dynamic. You bascially
         need to decided if you want to intercept all logs or if you want to ignore other
         module's log's at the very start of runtime. You can't update constructed
         loggers from Python's builtin :mod:`logging` after they have been defined.
@@ -159,7 +221,7 @@ class InterceptHandler(BaseLogHandler):
         def emit(self, record: logging.LogRecord):  # pragma: no cover
             """Given a :class:`logging.LogRecord` from logging, handle it with Loguru logging.
 
-            :param logging.LogRecord record: The log record to handle
+            :param ~logging.LogRecord record: The log record to handle
             """
 
             frame, depth = logging.currentframe(), 2  # type: ignore
@@ -176,7 +238,7 @@ class InterceptHandler(BaseLogHandler):
     def is_handled(cls, logger: Logger) -> bool:
         """Quick helper method to check if the given logger is already being handled.
 
-        :param Logger logger: The logger to check if already handled
+        :param ~loguru._logger.Logger logger: The logger to check if already handled
         :return: True if the logger is already handled, otherwise False
         :rtype: bool
         """
@@ -187,7 +249,7 @@ class InterceptHandler(BaseLogHandler):
     def add_handle(cls, logger: Logger) -> bool:
         """Add the logging handler to the given logger instance.
 
-        :param Logger logger: The logger instance to add the handler to
+        :param ~loguru._logger.Logger logger: The logger instance to add the handler to
         :return: True if the handler was added, False if the handle was already present
         :rtype: bool
         """
@@ -204,7 +266,7 @@ class InterceptHandler(BaseLogHandler):
     def remove_handle(cls, logger: Logger) -> bool:
         """Remove the logging handler from the given logger instance.
 
-        :param Logger logger: The logger instance to remove the handle
+        :param ~loguru._logger.Logger logger: The logger instance to remove the handle
         :return: True if the handler was removed, False if there was no handler present
         :rtype: bool
         """

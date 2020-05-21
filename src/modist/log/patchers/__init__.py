@@ -2,7 +2,7 @@
 # Copyright (c) 2020 Modist Team <admin@modist.io>
 # ISC License <https://opensource.org/licenses/isc>
 
-"""Contains log patcheres for loguru log records."""
+"""Module containing loguru log record patchers."""
 
 from typing import Any, Iterable
 
@@ -16,7 +16,7 @@ DEFAULT_PATCHERS: Iterable[Any] = []
 
 
 def patch_logger(logger: Logger, patchers: Iterable[Any] = DEFAULT_PATCHERS) -> Logger:
-    """Produce a new _wrapping_ logger that has been patched with the given patchers.
+    """Produce a new *wrapping* logger that has been patched with the given patchers.
 
     .. note:: You will probably never need to utilize this method to manually patch
         A logger instance with a specific patcher. This is simply a helper method
@@ -24,7 +24,8 @@ def patch_logger(logger: Logger, patchers: Iterable[Any] = DEFAULT_PATCHERS) -> 
         Likely all you need to use to begin logging is to utilize the provided logger
         instance:
 
-        .. code:: python
+        .. code-block:: python
+
             from modist.log import instance as log
             log.info("This is a logged message")
 
@@ -36,11 +37,11 @@ def patch_logger(logger: Logger, patchers: Iterable[Any] = DEFAULT_PATCHERS) -> 
     >>> log = get_logger()
     >>> patched_log = patch_logger(log, patchers=[datadog])
 
-    :param Logger logger: The root logger instance to patch
+    :param ~loguru._logger.Logger logger: The root logger instance to patch
     :param Iterable[Any] patchers: A list of patcher modules to use when producing a
         new patched logger instsance, optional, defaults to DEFAULT_PATCHERS
     :return: A new patched logger instance
-    :rtype: Logger
+    :rtype: ~loguru._logger.Logger
     """
 
     patched_logger: Logger = logger
