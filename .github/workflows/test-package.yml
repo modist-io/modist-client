@@ -7,6 +7,9 @@ jobs:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
         python-version: [3.7, 3.8]
+    env:
+      OS: ${{ matrix.os }}
+      PYTHON: ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout Repository
@@ -23,10 +26,14 @@ jobs:
         run: |
           pytest -p no:warnings
       - name: Build Coverage Report
-        if:  ${{ success() && matrix.os == 'ubuntu-latest' && matrix.python-version == 3.7 }}
         run: |
           coverage xml -o cobertura.xml
-      - name: Publish Coverage
+      - name: Publish Coverage CodeCov
+        uses: codcov/codecov-action@v1
+        with:
+          file: cobertura.xml
+          env_vars: OS,PYTHON
+      - name: Publish Coverage Codacy
         if: ${{ success() && matrix.os == 'ubuntu-latest' && matrix.python-version == 3.7 }}
         uses: codacy/codacy-coverage-reporter-action@master
         with:
