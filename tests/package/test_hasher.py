@@ -69,7 +69,13 @@ def test_hash_file(content: bytes, hash_types: Set[HashType], chunk_size: int):
 
             assert hash_type.hasher(content).hexdigest() == hash_result
     finally:
-        os.remove(temp_name)
+        try:
+            os.remove(temp_name)
+        except PermissionError:
+            # NOTE: typically occurs on windows when running tests in parallel, but
+            # since we are creating these in a temporary directory it shouldn't really
+            # matter if we can fully remove the link to this file
+            pass
 
 
 @given(
