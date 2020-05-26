@@ -44,9 +44,7 @@ System Context
    information is typically going to be used for making decisions for
    cross-os-compatable logic. Some of this information is quite useful for slight
    optimizations in the runtime such as our use-case of the
-   :data:`~SystemContext.is_64bit` attribute in our hashing methods.
-
-.. :TODO: replace "our hashing methods" with viable rst link when available
+   :data:`~SystemContext.is_64bit` attribute in :mod:`modist.package.hasher`.
 
 .. automodule:: modist.context.system
    :members:

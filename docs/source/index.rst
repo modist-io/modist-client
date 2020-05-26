@@ -1,5 +1,9 @@
 .. _index:
 
+.. meta::
+   :description: The local client for managing Modist mods
+   :keywords: modist, client, documentation
+
 Modist Client
 =============
 
