@@ -113,6 +113,7 @@ html_theme_options = {
     "master_doc": True,
     "touch_icon": "_static/img/icon.png",
     "logo_icon": "&#xe30d",
+    "heroes": {"index": "The local client for managing Modist mods"},
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,

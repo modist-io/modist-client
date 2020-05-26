@@ -5,3 +5,8 @@ dl.py code.sig-name {
 .md-nav__link.caption {
     margin-top: 1.5rem;
 }
+
+h1#index--page-root {
+    text-align: center;
+    font-size: 3rem;
+}

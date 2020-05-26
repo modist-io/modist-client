@@ -64,12 +64,13 @@ class ModistContext:
     ctx.name
 
     .. important:: Overriding the defaults produced from just instantiating this class
-        is highly discouraged. Many of these details are needed for producing system
+        is **highly** discouraged. Many of these details are needed for producing system
         configuration directories and may cause errors down the line if overridden
         during runtime.
 
         I would recommend you never initialize this class yourself and instead rely on
-        the :data:`~modist.context.instance` provided by :mod:`modist.context`.
+        the :data:`~modist.context.instance` provided by :mod:`modist.context` for
+        details from this context..
 
     :param str name: Explicitly ``Modist``
     :param str author: The included author string of the client package
