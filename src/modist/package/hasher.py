@@ -30,6 +30,7 @@ from typing import BinaryIO, Callable, Dict, Set, Union
 import xxhash
 
 from ..context import instance as ctx
+from ..log import instance as log
 
 Hasher_T = Callable[[Union[bytes, bytearray, memoryview]], "hashlib._Hash"]
 
@@ -91,7 +92,7 @@ def hash_io(
     >>> from modist.package.hasher import hash_io, HashType
     >>> string_io = StringIO("Hey, I'm a string")
     >>> byte_io = BytesIO(string_io.read().encode("utf-8"))
-    >>> hash_io(byte_io, {HashType("xxhash"), HashType.MD5})
+    >>> hash_io(byte_io, {HashType.XXHASH, HashType("md5")})
     {
         <HashType.XXHASH: 'xxhash'>: 'd299da7e31fb9c47',
         <HashType.MD5: 'md5'>: '25cb7b2c4e2064c1deebac4b66195c9c'
@@ -106,6 +107,7 @@ def hash_io(
     :rtype: Dict[HashType, str]
     """
 
+    log.debug(f"hashing {io!r} with types {types!r} at chunks of {chunk_size!r} bytes")
     hashers: Dict[HashType, "hashlib._Hash"] = {
         hash_type: hash_type.hasher()  # type: ignore
         for hash_type in types

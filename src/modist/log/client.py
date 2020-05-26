@@ -25,11 +25,13 @@ LOGGER_LEVELS = [
     {"name": "CRITICAL", "color": "<fg #ffffff><bg #E53935><bold>"},
 ]
 
-STDOUT_HANDLER = dict(sink=sys.stdout, level="TRACE", backtrace=True, diagnose=True)
+DEFAULT_HANDLER = dict(sink=sys.stdout, level="INFO")
+DEBUG_HANDLER = dict(sink=sys.stdout, level="DEBUG", backtrace=True, diagnose=True)
 
 # The overall logging configuration we use for our application's root logger
 # https://bit.ly/2NV6al8
-LOGGER_DEFAULT_CONFIG = dict(levels=LOGGER_LEVELS, handlers=[STDOUT_HANDLER])
+LOGGER_DEFAULT_CONFIG = dict(levels=LOGGER_LEVELS, handlers=[DEFAULT_HANDLER])
+LOGGER_DEBUG_CONFIG = dict(levels=LOGGER_LEVELS, handlers=[DEBUG_HANDLER])
 
 
 def configure_logger(
@@ -147,6 +149,7 @@ def get_logger() -> Logger:
     # So we just patch that alias in, users should utilize `warning` instead of `warn`.
     setattr(patched_logger, "warn", patched_logger.warning)
 
+    configure_logger()
     return patched_logger
 
 
