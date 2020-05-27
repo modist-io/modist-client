@@ -7,12 +7,13 @@
 import os
 from pathlib import Path, WindowsPath
 from tempfile import TemporaryDirectory
+from typing import List
 from unittest.mock import patch
 
 import appdirs
 import pytest
 from hypothesis import assume, given
-from hypothesis.strategies import characters, sampled_from, text
+from hypothesis.strategies import characters, integers, lists, sampled_from, text
 from semantic_version import Version
 
 from modist.context import modist, system
@@ -273,6 +274,66 @@ def test_get_is_elevated_windows():
         assert system.get_is_elevated()
 
 
+@given(lists(integers()), integers(min_value=0))
+def test_get_available_cpu_count(cpu_affinity: List[int], cpu_count: int):
+    """Ensure call to get_available_cpu_count works as expected."""
+
+    for affinity_os_type in (
+        system.OperatingSystem.Linux,
+        system.OperatingSystem.Windows,
+    ):
+        with patch.object(system, "get_os") as mocked_get_os:
+            mocked_get_os.return_value = affinity_os_type
+
+            with patch.object(system.psutil, "Process") as mocked_Process:
+                mocked_Process().cpu_affinity.return_value = cpu_affinity
+
+                assert system.get_available_cpu_count() == len(cpu_affinity)
+
+    with patch.object(system, "get_os") as mocked_get_os:
+        mocked_get_os.return_value = system.OperatingSystem.MacOS
+
+        with patch.object(system.psutil, "cpu_count") as mocked_cpu_count:
+            mocked_cpu_count.return_value = cpu_count
+
+            assert system.get_available_cpu_count() == cpu_count
+
+
+@pytest.mark.skipif(
+    system.get_os()
+    not in (system.OperatingSystem.Linux, system.OperatingSystem.Windows,),
+    reason="os specific test only works in Linux or Windows",
+)
+@given(lists(integers()))
+def test_get_available_cpu_count_non_mac(cpu_affinity: List[int]):
+    """Ensure call to get_available_cpu_count works as expected on non MacOS systems."""
+
+    assert system.get_available_cpu_count() > 0
+
+    with patch.object(system.psutil, "Process") as mocked_Process:
+        mocked_cpu_affinity = mocked_Process().cpu_affinity
+        mocked_cpu_affinity.return_value = cpu_affinity
+
+        assert system.get_available_cpu_count() == len(cpu_affinity)
+        mocked_cpu_affinity.assert_called_once()
+
+
+@pytest.mark.skipif(
+    system.get_os() != system.OperatingSystem.MacOS,
+    reason="os specific test only works in MacOS",
+)
+@given(integers(min_value=0))
+def test_get_available_cpu_count_mac(cpu_count: int):
+    """Ensure call to get_available_cpu_count works as expected on MacOS systems."""
+
+    assert system.get_available_cpu_count() > 0
+    with patch.object(system.psutil, "cpu_count") as mocked_cpu_count:
+        mocked_cpu_count.return_value = cpu_count
+
+        assert system.get_available_cpu_count() == cpu_count
+        mocked_cpu_count.assert_called_once()
+
+
 @given(text(alphabet=characters(blacklist_categories=["C", "Z"])))
 def test_get_username(username: str):
     """Ensure call to get_username works as expected."""
@@ -361,6 +422,7 @@ def test_SystemContext_default():
 
     assert ctx.is_64bit == system.get_is_64bit()
     assert ctx.is_elevated == system.get_is_elevated()
+    assert ctx.available_cpu_count == system.get_available_cpu_count()
     assert ctx.os == system.get_os()
     assert ctx.os_version == system.get_os_version()
     assert ctx.arch == system.get_arch()

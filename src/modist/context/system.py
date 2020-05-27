@@ -14,6 +14,7 @@ from pathlib import Path
 from platform import libc_ver, mac_ver, machine, system, win32_ver
 from typing import Optional
 
+import psutil
 from appdirs import user_cache_dir, user_config_dir, user_data_dir, user_log_dir
 from semantic_version import Version
 
@@ -211,6 +212,20 @@ def get_is_elevated() -> bool:
         return False
 
 
+def get_available_cpu_count() -> int:
+    """Determine the count of available CPUs.
+
+    :return: The count of available CPUs
+    :rtype: int
+    """
+
+    os_type = get_os()
+    if os_type in (OperatingSystem.Linux, OperatingSystem.Windows,):
+        return len(psutil.Process().cpu_affinity())
+    else:
+        return psutil.cpu_count()
+
+
 def get_username() -> str:
     """Determine the current user's username.
 
@@ -313,6 +328,7 @@ class SystemContext:
 
     :param bool is_64bit: True if the current system is 64bit
     :param bool is_elevated: True if the current runtime has elevated permissions
+    :param int available_cpu_count: The count of available CPUs
     :param OperatingSystem os: The current operating system
     :param Optional[~semantic_version.Version] os_version: The approximate operating
         system's semantic version
@@ -323,6 +339,7 @@ class SystemContext:
 
     is_64bit: bool = field(default_factory=get_is_64bit)
     is_elevated: bool = field(default_factory=get_is_elevated)
+    available_cpu_count: int = field(default_factory=get_available_cpu_count)
     os: Optional[OperatingSystem] = field(default_factory=get_os)
     os_version: Optional[Version] = field(default_factory=get_os_version)
     arch: Optional[ProcessorArchitecture] = field(default_factory=get_arch)
