@@ -114,7 +114,7 @@ def test_get_logger():
     """Ensure get_logger works."""
 
     get_logger.cache_clear()
-    assert get_logger() == loguru.logger
+    assert isinstance(get_logger(), loguru._logger.Logger)
 
 
 @patch("modist.log.client.patch_logger")
@@ -133,12 +133,12 @@ def test_get_logger_remaps_warn_callable():
     log = get_logger()
 
     assert hasattr(log, "warn")
-    assert log.warn == loguru.logger.warning
+    assert log.warn == log.warning
 
 
 def test_instance():
     """Ensure the global log instance is what we expect."""
 
     get_logger.cache_clear()
-    assert instance == loguru.logger
+    assert isinstance(instance, loguru._logger.Logger)
     assert get_logger() == instance
