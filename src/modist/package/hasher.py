@@ -49,7 +49,7 @@ class HashType(Enum):
     BLAKE2S = "blake2s"
 
     # NOTE: Enums still consider class-managled class properties as values in the
-    # enumeration. So you can do HashType.__available_hashers or
+    # enumeration. So you can do HashType._HashType__available_hashers or
     # HashType("__available_hashers") and it's *technically* valid.
     __available_hashers: Dict[str, Hasher_T] = {
         XXHASH: (xxhash.xxh64 if ctx.system.is_64bit else xxhash.xxh32),

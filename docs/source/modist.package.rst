@@ -9,6 +9,14 @@
    :show-inheritance:
 
 
+Archiving
+---------
+
+.. automodule:: modist.package.archive
+   :members:
+   :undoc-members:
+
+
 Hashing
 -------
 
