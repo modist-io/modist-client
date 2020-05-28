@@ -25,7 +25,7 @@ calculating checksums for files >1GB which is safe and **very** fast using xxhas
 import hashlib
 from enum import Enum
 from pathlib import Path
-from typing import BinaryIO, Callable, Dict, Set, Union
+from typing import IO, BinaryIO, Callable, Dict, Set, Union
 
 import xxhash
 
@@ -72,7 +72,9 @@ class HashType(Enum):
 
 
 def hash_io(
-    io: BinaryIO, types: Set[HashType], chunk_size: int = DEFAULT_CHUNK_SIZE
+    io: Union[BinaryIO, IO[bytes]],
+    types: Set[HashType],
+    chunk_size: int = DEFAULT_CHUNK_SIZE,
 ) -> Dict[HashType, str]:
     """Calculate the requested hash types for some given binary IO instance.
 

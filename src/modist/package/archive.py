@@ -24,21 +24,23 @@ Path("/CURRENT/WORKING/DIRECTORY/my-mod-x.x.x.tar.xz")
 """
 
 import concurrent.futures
+import functools
 import os
 import tarfile
 import time
 from enum import Enum
 from io import BytesIO
 from pathlib import Path
-from typing import Dict, Generator, Optional, Set, Tuple
+from typing import IO, Dict, Generator, Optional, Set, Tuple
 
 import rapidjson as json
 from wcmatch import pathlib as wcmatch_pathlib
 
 from ..context import instance as ctx
 from ..core.mod import Mod
+from ..exceptions import BadArchive, NotAMod, NotAnArchive
 from ..log import instance as log
-from .hasher import HashType, hash_file
+from .hasher import HashType, hash_file, hash_io
 
 
 class ArchiveType(Enum):
@@ -174,7 +176,7 @@ def build_archive_name(
     :param ~modist.core.Mod mod: The mod to build the archive filename for
     :param ArchiveType archive_type: The type of archive being built
         (this is used to generate an appropriate subextension),
-        optional, defaults to DEFAULT_ARCHIVE_TYPE
+        optional, defaults to ``DEFAULT_ARCHIVE_TYPE``
     :return: A filename string for the given mod's archive
     :rtype: str
     """
@@ -292,3 +294,142 @@ def create_archive(
         log.info(f"removing created archive at {output_path!r} due to raised exception")
         os.remove(output_path)
         raise
+
+
+@functools.lru_cache()
+def verify_is_archive(archive_path: Path):
+    """Verify a given path to an archive is actually an existing archive.
+
+    :param ~pathlib.Path archive_path: The path to the archive
+    :raises FileNotFoundError: If the given ``archive_path`` is not an existing file
+    :raises NotAnArchive: If the given ``archive_path`` is not determined as parseable
+        by :mod:`tarfile` via :func:`tarfile.is_tarfile`
+    """
+
+    log.info(f"verifying archive at {archive_path!r} is an archive")
+    if not archive_path.is_file():
+        raise FileNotFoundError(f"no such file {archive_path!r} exists")
+
+    if not tarfile.is_tarfile(archive_path.as_posix()):
+        raise NotAnArchive(f"file {archive_path!r} is not a valid archive")
+
+
+def read_manifest(archive_path: Path) -> Tuple[tarfile.TarInfo, Dict[str, str]]:
+    """Read the manifest content's from a given archive.
+
+    :param ~pathlib.Path archive_path: The path of the archive to read the manifest from
+    :raises NotAMod: If the given archive doesn't have a manifest
+    :raises BadArchive: If the extraction of the manifest from the archive fails
+    :return: A tuple of the manifest's tar info and the manifest dictionary
+    :rtype: Tuple[tarfile.TarInfo, Dict[str, str]]
+    """
+
+    verify_is_archive(archive_path)
+
+    # transparent compression is determined by `r:*`, don't switch this out for `r|*` as
+    # we need to be able to do backwards seeks in the tarfile io buffer
+    with tarfile.open(archive_path.as_posix(), "r:*") as tar:
+        try:
+            # TODO: manifest path needs to be more static
+            manifest_info = tar.getmember(".mod/manifest.json")
+        except KeyError:
+            raise NotAMod(f"file {archive_path!r} is not an archive of a mod")
+
+        log.debug(
+            f"reading manifest from {manifest_info!r} from archive at {archive_path!r}"
+        )
+        manifest_io = tar.extractfile(member=manifest_info)
+        if not manifest_io:
+            raise BadArchive(
+                f"failed to extract manifest from archive at {archive_path!r}"
+            )
+
+        return manifest_info, json.loads(manifest_io.read().decode("utf-8"))
+
+
+def verify_artifact(
+    artifact_io: IO[bytes],
+    artifact_info: tarfile.TarInfo,
+    checksum: str,
+    hash_type: HashType = DEFAULT_ARCHIVE_HASH_TYPE,
+):
+    """Verify a given artifact buffer is valid against the manifest.
+
+    :param IO[bytes] artifact_io: The bytes IO buffer for this artifact
+    :param ~tarfile.TarInfo artifact_info: The tar info for this artifact
+    :param str checksum: The manifest checksum of this artifact
+    :param HashType hash_type: The type of hashing algorithm the archive's manifest is
+        using, optional, defaults to ``DEFAULT_ARCHIVE_HASH_TYPE``
+    :raises BadArchive: When the manifest checksum of an artifact doesn't match
+        the extracted artifact's checksum
+    """
+
+    artifact_checksum = hash_io(artifact_io, {hash_type})[hash_type]
+    log.info(
+        f"checking artifact {artifact_info!r} checksum {artifact_checksum!r} matches "
+        f"manifest checksum {checksum!r}"
+    )
+    if not checksum == artifact_checksum:
+        raise BadArchive(
+            f"checksum {artifact_checksum!r} is invalid for artifact "
+            f"{artifact_info!r}, expected {checksum!r}"
+        )
+
+
+def verify_archive(archive_path: Path, max_workers: Optional[int] = None):
+    """Verify a given archive is a valid mod's archive.
+
+    :param ~pathlib.Path archive_path: The path to the archive to validate
+    :param Optional[int] max_workers: The maximum number of thread workers to process
+        artifact checksums with
+    :raises FileNotFoundError: If the given ``archive_path`` doesn't exist
+    :raises NotAnArchive: If the given ``archive_path`` is not determined as parseable
+        by :mod:`tarfile` via :func:`tarfile.is_tarfile`
+    :raises NotAMod: If the archive does not *appear* to be a mod's archive
+    :raises BadArchive: When the extraction of the mod manifest fails
+    :raises BadArchive: When an unexpected artifact (not in the manifest) is encountered
+    :raises BadArchive: When the extraction of an artifact fails
+    :raises BadArchive: When the manifest checksum of an artifact doesn't match the
+        extracted artifact's checksum
+    """
+
+    log.info(f"verifying archive at {archive_path!r}")
+    manifest_info, manifest = read_manifest(archive_path)
+
+    # transparent compression is determined by `r:*`, don't switch this out for `r|*` as
+    # we need to be able to do backwards seeks in the tarfile io buffer
+    with tarfile.open(archive_path.as_posix(), "r:*") as tar:
+        for artifact_info in filter(
+            lambda member: member.name != manifest_info.name, tar.getmembers()
+        ):
+            log.debug(
+                f"verifying artifact {artifact_info!r} from archive at {archive_path!r}"
+            )
+            if artifact_info.name not in manifest:
+                raise BadArchive(f"unexpected artifact {artifact_info!r} in archive")
+
+            artifact_io = tar.extractfile(member=artifact_info)
+            if not artifact_io:
+                raise BadArchive(
+                    f"failed to extract artifact {artifact_info!r} from archive at "
+                    f"{archive_path!r}"
+                )
+
+            future_map: Dict[concurrent.futures.Future, tarfile.TarInfo] = {}
+            with concurrent.futures.ThreadPoolExecutor(
+                max_workers=(
+                    max_workers if max_workers else (ctx.system.available_cpu_count - 1)
+                )
+            ) as executor:
+                verify_future = executor.submit(
+                    verify_artifact,
+                    artifact_io=artifact_io,
+                    artifact_info=artifact_info,
+                    checksum=manifest[artifact_info.name],
+                )
+                future_map[verify_future] = artifact_info
+
+            for future in concurrent.futures.as_completed(future_map):
+                future.result()
+
+    log.success(f"archive at {archive_path!r} appears to be valid")
