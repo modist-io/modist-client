@@ -10,3 +10,7 @@ h1#index--page-root {
     text-align: center;
     font-size: 3rem;
 }
+
+a.headerlink:hover {
+    opacity: 1;
+}
