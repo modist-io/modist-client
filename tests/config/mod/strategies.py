@@ -34,6 +34,7 @@ from modist.config.mod.mod import (
     MOD_KEYWORD_PATTERN,
     MOD_KEYWORDS_MAX_LENGTH,
     MOD_NAME_PATTERN,
+    ModConfig,
 )
 from modist.config.mod.require import OperatingSystem, ProcessorArchitecture
 
@@ -272,3 +273,16 @@ def mod_config_payload(
             else depends_strategy
         ),
     }
+
+
+@composite
+def minimal_mod_config(
+    draw, payload_strategy: Optional[SearchStrategy[dict]] = None
+) -> ModConfig:
+    """Composite strategy for building a minimal mod config instance."""
+
+    return ModConfig(
+        **draw(
+            minimal_mod_config_payload() if not payload_strategy else payload_strategy
+        )
+    )

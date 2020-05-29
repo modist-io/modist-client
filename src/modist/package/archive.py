@@ -28,6 +28,7 @@ None
 
 import concurrent.futures
 import functools
+import re
 import tarfile
 import time
 from enum import Enum
@@ -54,11 +55,15 @@ class ArchiveType(Enum):
 
 
 MANIFEST_NAME = "manifest.json"
+MANIFEST_MODE = 0o655
+DEFAULT_MANIFEST_INCLUDE = {"*"}
 DEFAULT_ARCHIVE_TYPE = ArchiveType.LZMA
 DEFAULT_ARCHIVE_HASH_TYPE = HashType.XXHASH
 
+UNSAFE_ARTIFACT_NAME_PATTERN = re.compile(r"^/|\.{2,}")
 
-def walk_directory(
+
+def walk_directory_artifacts(
     directory: Path,
     include: Optional[Set[str]] = None,
     exclude: Optional[Set[str]] = None,
@@ -73,8 +78,11 @@ def walk_directory(
     For example, if I wanted a single expression to include all ``.ts`` and ``.js``
     files, I could use the following expression:
 
-    >>> from modist.package.archive import walk_directory
-    >>> for filepath in walk_directory(Path("/some/directory"), include={"*.{t,j}s"}):
+    >>> from modist.package.archive import walk_directory_artifacts
+    >>> for filepath in walk_directory_artifacts(
+    ...     Path("/some/directory"),
+    ...     include={"*.{t,j}s"}
+    ... ):
     >>>     print(filepath)
 
 
@@ -102,7 +110,7 @@ def walk_directory(
 
     wc_path = wcmatch_pathlib.Path(directory).resolve()
     if not include:
-        include = {"*"}
+        include = DEFAULT_MANIFEST_INCLUDE
         log.warning(
             "no includes provided for directory walk, "
             f"defaulting to {include!r} which may be expensive"
@@ -144,7 +152,10 @@ def build_manifest(
     log.info(f"building archive manifest for {mod!r}")
     artifacts: Dict[str, str] = {}
 
-    for filepath in walk_directory(mod.mod_dirpath, include={"*"}):
+    # we always include all details in the mod metadata directory in the manifest
+    for filepath in walk_directory_artifacts(
+        mod.mod_dirpath, include=DEFAULT_MANIFEST_INCLUDE
+    ):
         artifacts[filepath.relative_to(mod.path).as_posix()] = hash_file(
             filepath, {hash_type}
         )[hash_type]
@@ -157,7 +168,7 @@ def build_manifest(
         )
     ) as executor:
         future_map: Dict[concurrent.futures.Future, Path] = {}
-        for filepath in walk_directory(
+        for filepath in walk_directory_artifacts(
             mod.path, include=set(mod.config.include), exclude=set(mod.config.exclude)
         ):
             submitted_future = executor.submit(hash_file, filepath, {hash_type})
@@ -196,9 +207,7 @@ def build_manifest_name() -> str:
     return f"{MOD_DIRECTORY_NAME!s}/{MANIFEST_NAME!s}"
 
 
-def build_manifest_info(
-    mod: Mod, manifest: ManifestConfig
-) -> Tuple[tarfile.TarInfo, BytesIO]:
+def build_manifest_info(manifest: ManifestConfig) -> Tuple[tarfile.TarInfo, BytesIO]:
     """Build the appropriate archive manifest's tar info record.
 
     The output of this function results in both the appropriate
@@ -208,20 +217,15 @@ def build_manifest_info(
 
     >>> import tarfile
     >>> from modist.package.archive import build_manifest_info, build_manifest
-    >>> from modist.core import Mod
-    >>> mod = Mod.from_dir("/SOME/MOD/DIRECTORY")
     >>> with tarfile.open("/SOME/MOD/DIRECTORY/archive.tar.gz", "w:gz") as tar:
     ...     tar.addfile(*build_manifest_info(build_manifest(mod)))
 
 
-    :param ~modist.core.Mod mod: The mod the manifest refers to
     :param ~modist.config.manifest.ManifestConfig manifest: The manifest instance
     :return: A tuple of the manifest's tar record and the io buffer that should be used
         to write the manifest into the archive
     :rtype: Tuple[~tarfile.TarInfo, ~io.BytesIO]
     """
-
-    log.debug(f"building custom tar info for manifest of {mod!r}")
 
     manifest_content = bytes(manifest.to_json(), "utf-8")
     manifest_tarinfo = tarfile.TarInfo(name=build_manifest_name())
@@ -229,7 +233,7 @@ def build_manifest_info(
     manifest_tarinfo.size = len(manifest_content)
     manifest_tarinfo.type = tarfile.REGTYPE
     manifest_tarinfo.mtime = int(time.time())
-    manifest_tarinfo.mode = 0o655
+    manifest_tarinfo.mode = MANIFEST_MODE
     manifest_tarinfo.uname = ctx.system.user.username
 
     return manifest_tarinfo, BytesIO(manifest_content)
@@ -289,7 +293,7 @@ def create_archive(
                 tar.add(name=fullpath.as_posix(), arcname=artifact_name)
 
             # NOTE: we should always be writing manifest details into the archive last
-            manifest_info, manifest_io = build_manifest_info(mod=mod, manifest=manifest)
+            manifest_info, manifest_io = build_manifest_info(manifest=manifest)
             log.debug(
                 f"adding manifest to the archive at {output_path!r} using "
                 f"archived name {manifest_info.name!r}"
@@ -447,6 +451,16 @@ def verify_archive(archive_path: Path, max_workers: Optional[int] = None):
             if artifact_info.name not in manifest.artifacts:
                 raise BadArchive(f"unexpected artifact {artifact_info!r} in archive")
 
+            # XXX: archives can potentially contain unsafe extraction names that extract
+            # themselves to the local machine's root directory or outside of the target
+            # directory when written with a name using either of the following prefixes:
+            #   - "/"
+            #   - ".."
+            # We do a quick regex match here to ensure that the archived name doesn't
+            # contain a name using one of these unsafe patterns
+            if UNSAFE_ARTIFACT_NAME_PATTERN.match(artifact_info.name):
+                raise BadArchive(f"unsafe artifact name {artifact_info!r} in archive")
+
             # we are building a multi-threaded artifact verification since we must
             # recalculate checksums which can be greatly benefited if split up when
             # dealing with archives containing large files
@@ -471,3 +485,50 @@ def verify_archive(archive_path: Path, max_workers: Optional[int] = None):
                 future.result()
 
     log.success(f"archive at {archive_path!r} appears to be valid")
+
+
+def extract_archive(archive_path: Path, output_dir: Path, verify: bool = True) -> Path:
+    """Extract the contents of a given archive to an output directory.
+
+    .. caution:: If you decide to disable archive pre-verification by toggling the
+        ``verify`` flag to false, you may be in danger of the archive not only not being
+        an tampered mod archive, but extracting the archive could potentially write
+        files outside of the scope of the ``output_dir`` path.
+
+        See the warning in :meth:`tarfile.TarFile.extractall`. Performing verification
+        will take measures to prevent this before you attempt to extract all members
+        from the archive to the provided output directory.
+
+
+    :param ~pathlib.Path archive_path: The path to the archive to extract
+    :param ~pathlib.Path output_dir: The path to the directory to write artifacts to
+    :param bool verify: Flag that indicates if archive verification should occur before
+        attempting to extract, optional, defaults to True
+    :raises FileNotFoundError: If the given archive path does not exist
+    :raises NotAnArchive: If the given archive path is not a path to an archive
+    :raises BadArchive: If the given archive is determined to be invalid or unsafe
+    :raises NotADirectoryError: If the given ``output_dir`` is not a valid directory
+    :return: The directory the content of the archive was written to
+    :rtype: ~pathlib.Path
+    """
+
+    log.info(f"extracting archive from {archive_path!r} to directory {output_dir!r}")
+    if verify:
+        verify_archive(archive_path)
+    else:
+        log.warning(
+            f"skipping pre-verification of archive at {archive_path!r} before "
+            "extracting artifacts, this is potentially very dangerous"
+        )
+        # at the very least we need to verify that we can process the given archive
+        verify_is_archive(archive_path)
+
+    if not output_dir.is_dir():
+        raise NotADirectoryError(f"no such directory {output_dir!r} exists")
+
+    with tarfile.open(archive_path, "r:*") as tar:
+        log.debug(f"extracting all members from archive {tar!r} to {output_dir!r}")
+        tar.extractall(path=output_dir)
+
+    log.success(f"extracted archive from {archive_path!r} to directory {output_dir!r}")
+    return output_dir

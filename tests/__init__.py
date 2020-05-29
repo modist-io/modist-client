@@ -9,6 +9,10 @@ import sys
 
 from hypothesis import HealthCheck, settings
 
+from modist.log.client import configure_logger
+
+configure_logger({"handlers": [{"sink": os.devnull, "level": "CRITICAL"}]})
+
 settings.register_profile("default", max_examples=30)
 settings.register_profile(
     "ci", suppress_health_check=[HealthCheck.too_slow], max_examples=30, deadline=None

@@ -16,7 +16,11 @@ from hypothesis.strategies import (
     just,
 )
 
-from modist.config.manifest import MANIFEST_VERSION_MAX, MANIFEST_VERSION_MIN
+from modist.config.manifest import (
+    MANIFEST_VERSION_MAX,
+    MANIFEST_VERSION_MIN,
+    ManifestConfig,
+)
 from modist.package.hasher import HashType
 
 from ..package.strategies import hash_hexdigest, hash_type
@@ -67,3 +71,18 @@ def minimal_manifest_config_payload(
             else version_strategy
         ),
     }
+
+
+@composite
+def manifest_config(
+    draw, payload_strategy: Optional[SearchStrategy[dict]] = None
+) -> ManifestConfig:
+    """Composite strategy for building a minimal manifest config instance."""
+
+    return ManifestConfig(
+        **draw(
+            minimal_manifest_config_payload()
+            if not payload_strategy
+            else payload_strategy
+        )
+    )
