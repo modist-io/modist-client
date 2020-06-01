@@ -50,7 +50,7 @@ class ArchiveType(Enum):
     """Enumeration of supported archive types."""
 
     GZIP = "gz"
-    BZIP2 = "bzip"
+    BZIP2 = "bz2"
     LZMA = "xz"
 
 
@@ -376,10 +376,15 @@ def read_manifest(archive_path: Path) -> Tuple[tarfile.TarInfo, ManifestConfig]:
                 f"failed to extract manifest from archive at {archive_path!r}"
             )
 
-        return (
-            manifest_info,
-            ManifestConfig.from_json(manifest_io.read().decode("utf-8")),
-        )
+        try:
+            return (
+                manifest_info,
+                ManifestConfig.from_json(manifest_io.read().decode("utf-8")),
+            )
+        except Exception as exc:
+            raise BadArchive(
+                f"failed to parse manifest from archive at {archive_path!r}"
+            ) from exc
 
 
 def verify_archive_artifact(
@@ -410,7 +415,7 @@ def verify_archive_artifact(
         f"checking artifact {artifact_info!r} checksum {artifact_checksum!r} matches "
         f"manifest checksum {checksum!r}"
     )
-    if not checksum == artifact_checksum:
+    if checksum != artifact_checksum:
         raise BadArchive(
             f"checksum {artifact_checksum!r} is invalid for artifact "
             f"{artifact_info!r}, expected {checksum!r}"
@@ -513,6 +518,9 @@ def extract_archive(archive_path: Path, output_dir: Path, verify: bool = True) -
     """
 
     log.info(f"extracting archive from {archive_path!r} to directory {output_dir!r}")
+    if not output_dir.is_dir():
+        raise NotADirectoryError(f"no such directory {output_dir!r} exists")
+
     if verify:
         verify_archive(archive_path)
     else:
@@ -523,11 +531,11 @@ def extract_archive(archive_path: Path, output_dir: Path, verify: bool = True) -
         # at the very least we need to verify that we can process the given archive
         verify_is_archive(archive_path)
 
-    if not output_dir.is_dir():
-        raise NotADirectoryError(f"no such directory {output_dir!r} exists")
-
     with tarfile.open(archive_path, "r:*") as tar:
         log.debug(f"extracting all members from archive {tar!r} to {output_dir!r}")
+        # NOTE: we are specifically not using tar.extract() per file due to several
+        # extraction issues that have always existed in the tarfile builtin package.
+        # See the tarfile tar.extract note on issues related to using extract()
         tar.extractall(path=output_dir)
 
     log.success(f"extracted archive from {archive_path!r} to directory {output_dir!r}")

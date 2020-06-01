@@ -9,7 +9,10 @@ import os
 import shutil
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Dict, Generator
+from tempfile import TemporaryDirectory, mkstemp
+from typing import Any, Dict, Generator, Optional
+
+from modist import __version__
 
 
 @contextmanager
@@ -54,3 +57,49 @@ def cd(path: Path, create_missing: bool = True) -> Generator[Path, None, None]:
         os.chdir(orig_path.as_posix())
         if was_created:
             shutil.rmtree(path)
+
+
+@contextmanager
+def temporary_filepath(reason: Optional[str] = None) -> Generator[Path, None, None]:
+    """Generate a temporary file inside of a context manager.
+
+    This context manager creates a temporary file and closes it. What you get back is
+    the absolute :class:`~pathlib.Path` of the created file. When the context exists,
+    this created file will be deleted. So you don't get back any IO, you only get a
+    location that is guaranteed to exist and be empty.
+
+    :param Optional[str] reason: The optional reason / context for this temporary file
+        existing, optional, defaults to None
+    """
+
+    suffix = f"-{__version__.__name__!s}_test"
+    if isinstance(reason, str) and len(reason) > 0:
+        suffix += f"-{reason!s}"
+
+    try:
+        temp_file_io, temp_file_name = mkstemp(suffix=suffix)
+        os.close(temp_file_io)
+        filepath = Path(temp_file_name).resolve()
+        yield filepath
+    finally:
+        filepath.unlink()
+
+
+@contextmanager
+def temporary_directory(reason: Optional[str] = None) -> Generator[Path, None, None]:
+    """Generate a temporary directory inside of a context manager.
+
+    .. note:: Yes, :class:`tempfile.TemporaryDirectory` does this already. We are
+        wrapping that with our own to be a bit more useful for our purpose and
+        to be a bit more explict with all the directories we create for testing
+
+    :param Optional[str] reason: The optional reason / context for this temporary
+        directory existing, optional, defaults to None
+    """
+
+    suffix = f"-{__version__.__name__!s}_test"
+    if isinstance(reason, str) and len(reason) > 0:
+        suffix += f"-{reason!s}"
+
+    with TemporaryDirectory(suffix=suffix) as temp_dir:
+        yield Path(temp_dir).resolve()
