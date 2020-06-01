@@ -11,7 +11,7 @@ from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 import pytest
-from hypothesis import given
+from hypothesis import given, settings
 from hypothesis.strategies import data, sampled_from
 from wcmatch.pathlib import BRACE, GLOBSTAR, NEGATE
 
@@ -89,6 +89,7 @@ def test_walk_directory_artifacts_only_yields_files():
 
 
 @pytest.mark.expensive
+@settings(max_examples=5)
 @given(data())
 def test_build_manifest(data):
     """Ensure calls to build_manifest work as expected."""
