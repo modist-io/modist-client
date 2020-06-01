@@ -7,11 +7,12 @@
 import tarfile
 from io import BytesIO
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 import pytest
 from hypothesis import given
-from hypothesis.strategies import sampled_from
+from hypothesis.strategies import data, sampled_from
 from wcmatch.pathlib import BRACE, GLOBSTAR, NEGATE
 
 from modist.config.manifest import ManifestConfig
@@ -20,7 +21,7 @@ from modist.core.mod import MOD_DIRECTORY_NAME, Mod
 from modist.package import archive
 
 from ..config.strategies import manifest_config
-from ..core.strategies import mod
+from ..core.strategies import fake_mod, real_mod
 from ..strategies import pathlib_path
 
 TEST_DIRECTORY_PATH = Path(__file__).parent.parent
@@ -87,7 +88,21 @@ def test_walk_directory_artifacts_only_yields_files():
         assert filepath.is_file()
 
 
-@given(mod(), sampled_from(archive.ArchiveType))
+@pytest.mark.expensive
+@given(data())
+def test_build_manifest(data):
+    """Ensure calls to build_manifest work as expected."""
+
+    with TemporaryDirectory() as temp_dir:
+        temp_dirpath = Path(temp_dir).resolve()
+        mod: Mod = data.draw(real_mod(temp_dirpath))
+
+        manifest = archive.build_manifest(mod)
+        assert isinstance(manifest, ManifestConfig)
+        assert len(manifest.artifacts) == len(list(mod.path.iterdir()))
+
+
+@given(fake_mod(), sampled_from(archive.ArchiveType))
 def test_build_archive_name(mod: Mod, archive_type: archive.ArchiveType):
     """Ensure calls to build_archive_name works as expected."""
 
