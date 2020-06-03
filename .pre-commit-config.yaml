@@ -1,15 +1,4 @@
 repos:
-  - repo: local
-    hooks:
-      - id: pytest
-        name: Test Package
-        description: Run full test suite
-        entry: pipenv run invoke -e test
-        language: system
-        stages: [push]
-        files: ^$
-        always_run: true
-
   - repo: https://github.com/ambv/black
     rev: 19.10b0
     hooks:
