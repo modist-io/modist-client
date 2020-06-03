@@ -45,6 +45,14 @@ class ManifestConfig(BaseConfig):
 
     @validator("artifacts")
     def validate_artifacts(cls, value: Dict[str, str]) -> Dict[str, str]:  # noqa
+        """Validate the manifest's provided artifacts.
+
+        :param Dict[str, str] value: The dictionary of name to checksum artifacts
+        :raises ValueError: If there are no artifacts present
+        :return: The validated dictionary of name to checksum artifacts
+        :rtype: Dict[str, str]
+        """
+
         if len(value) <= 0:
             raise ValueError("requires at least one artifact")
 
