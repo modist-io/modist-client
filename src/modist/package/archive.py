@@ -5,11 +5,13 @@
 """This module provides functions to handle archiving a Mod for distribution.
 
 We support all of the currently available tar compression algorithms from :mod:`tarfile`
-and deal with manifest and checksum generation by default. Although it is very easy to
-override the default archive type and the default archive checksum (hash) type, it is
-**highly discouraged** that you do so. Since many remote APIs will be expecting the
-default archive format, overriding these may cause the upload / publish of the mod
-archive to fail.
+and deal with manifest and checksum generation by default.
+
+.. caution:: Although it is very easy to override the default archive type and the
+    default archive checksum (hash) type, it is **highly discouraged** that you do so.
+    Since many remote APIs will be expecting the default archive format, overriding
+    these may cause the upload / publish of the mod archive to fail.
+
 The available archive and checksum hash type options here are purely for 1-off use cases
 where the remote API is either using a newer distribution format (or a deprecated one).
 

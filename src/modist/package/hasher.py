@@ -29,7 +29,6 @@ from typing import IO, BinaryIO, Callable, Dict, Set, Union
 
 import xxhash
 
-from ..context import instance as ctx
 from ..log import instance as log
 
 Hasher_T = Callable[[Union[bytes, bytearray, memoryview]], "hashlib._Hash"]
@@ -52,7 +51,7 @@ class HashType(Enum):
     # enumeration. So you can do HashType._HashType__available_hashers or
     # HashType("__available_hashers") and it's *technically* valid.
     __available_hashers: Dict[str, Hasher_T] = {
-        XXHASH: (xxhash.xxh64 if ctx.system.is_64bit else xxhash.xxh32),
+        XXHASH: xxhash.xxh64,
         MD5: hashlib.md5,
         SHA1: hashlib.sha1,
         SHA256: hashlib.sha256,
