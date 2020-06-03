@@ -12,15 +12,12 @@ from typing import Set
 
 import pytest
 from hypothesis import given
-from hypothesis.strategies import binary, integers, sampled_from, sets
+from hypothesis.strategies import binary, integers, sets
 
 from modist.package.hasher import DEFAULT_CHUNK_SIZE, HashType, hash_file, hash_io
 
 from ..strategies import pathlib_path
-
-HashType_strategy = sampled_from(HashType).filter(
-    lambda hash_type: hash_type != HashType._HashType__available_hashers  # type: ignore
-)
+from .strategies import HashType_strategy
 
 
 @given(

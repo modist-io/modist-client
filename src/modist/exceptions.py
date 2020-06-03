@@ -28,3 +28,11 @@ class IsAMod(ModistException):
 
 class NotAMod(ModistException):
     """Indicates the building of a mod failed due to given information being invalid."""
+
+
+class NotAnArchive(ModistException):
+    """Indicates a provided reference is not a valid archive."""
+
+
+class BadArchive(ModistException):
+    """Indicates something went wrong when evaluating an archive."""
